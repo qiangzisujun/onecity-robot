@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.CustomerRechargeRecordMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.CustomerRechargeRecord">
+        <id column="id" property="id" />
+        <result column="puser_code" property="puserCode" />
+        <result column="customer_code" property="customerCode" />
+        <result column="amount" property="amount" />
+        <result column="integral" property="integral" />
+        <result column="recharge_code" property="rechargeCode" />
+        <result column="recharge_describe" property="rechargeDescribe" />
+        <result column="type" property="type" />
+        <result column="create_time" property="createTime" />
+        <result column="payment" property="payment" />
+        <result column="user_name" property="userName" />
+        <result column="user_mobile" property="userMobile" />
+        <result column="deductions_score" property="deductionsScore" />
+        <result column="agent_mobile" property="agentMobile" />
+        <result column="agent_name" property="agentName" />
+        <result column="black_statu" property="blackStatu" />
+        <result column="goods_type_id" property="goodsTypeId" />
+    </resultMap>
+
+    <select id="findCustomerRechargeRecord" resultMap="BaseResultMap">
+        SELECT a.*, b.user_name, b.user_mobile, b.black_statu
+        FROM customer_recharge_record a,customer b
+        <where>
+            a.customer_code=b.user_code and b.is_robot=0 AND a.type != 7 AND a.type != 8
+            <if test="userRealName !=null and userRealName != ''">
+                AND b.user_name LIKE CONCAT("%",#{userRealName},"%")
+            </if>
+            <if test="phone!=null and phone != ''">
+                AND b.user_mobile=#{phone}
+            </if>
+            <if test="orderNo!=null and orderNo != ''">
+                AND a.recharge_code=#{orderNo}
+            </if>
+            <if test="typeId!=null and typeId !=-1">
+                AND a.type=#{typeId}
+            </if>
+            <if test="status!=null and status != '' and status !=-1">
+                AND a.payment=#{status}
+            </if>
+            <if test="registerStartTime !=null and registerStartTime !=''">
+                <![CDATA[AND a.create_time>=#{registerStartTime}]]>
+            </if>
+            <if test="registerEndTime !=null and registerEndTime !=''">
+                <![CDATA[AND a.create_time<=#{registerEndTime}]]>
+            </if>
+        </where>
+        order by a.create_time desc
+    </select>
+    <select id="countCustomerRechargeRecord" resultType="int">
+        SELECT IF(count(1) is null,0,count(1))
+        FROM customer_recharge_record a,customer b
+        <where>
+            a.customer_code=b.user_code and b.is_robot=0 AND a.type != 7 AND a.type != 8
+            <if test="userRealName !=null and userRealName != ''">
+                AND b.user_name LIKE CONCAT("%",#{userRealName},"%")
+            </if>
+            <if test="phone!=null and phone != ''">
+                AND b.user_mobile=#{phone}
+            </if>
+            <if test="orderNo!=null and orderNo != ''">
+                AND a.recharge_code=#{orderNo}
+            </if>
+            <if test="typeId!=null and typeId != '' and typeId !=-1">
+                AND a.type=#{typeId}
+            </if>
+            <if test="status!=null and status != '' and status !=-1">
+                AND a.payment=#{status}
+            </if>
+            <if test="registerStartTime !=null and registerStartTime !=''">
+                <![CDATA[AND a.create_time>=#{registerStartTime}]]>
+            </if>
+            <if test="registerEndTime !=null and registerEndTime !=''">
+                <![CDATA[AND a.create_time<=#{registerEndTime}]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="sumCustomerRechargeRecordTotal" resultType="java.util.HashMap">
+        SELECT COALESCE(SUM(amount) ,0) as amount,customer_code as customerCode FROM customer_recharge_record
+        where type=1 and customer_code in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY customer_code
+    </select>
+
+
+    <select id="findAgentRechargeRecord" resultMap="BaseResultMap">
+        SELECT a.id, b.user_name, b.user_mobile,
+        (select c.user_name from customer c where user_code = a.puser_code) agent_name,
+        (select c.user_mobile from customer c where user_code = a.puser_code) agent_mobile,
+        a.amount,
+        a.type,
+        a.recharge_describe,
+        a.create_time,
+        a.payment,
+        a.recharge_describe
+        FROM customer_recharge_record a
+        left join customer b on a.customer_code = b.user_code
+        left join customer c on c.user_code = a.puser_code
+        <where>
+             b.is_robot = 0 AND a.payment = 5 AND a.recharge_describe != '充值赠送'
+            <if test="phone!=null and phone != ''">
+                AND c.user_mobile=#{phone}
+            </if>
+            <if test="typeId!=null and typeId != '' and typeId !=-1">
+                AND a.type=#{typeId}
+            </if>
+            <if test="registerStartTime !=null and registerStartTime !='' and registerEndTime !=null and registerEndTime !=''">
+                and a.create_time between #{registerStartTime} and #{registerEndTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="sumProxyExpensesRecord" resultType="java.lang.Double">
+        SELECT
+        IF(sum(a.amount) is null,0.00,sum(a.amount)) as amount
+        FROM customer_recharge_record a
+        left join customer b on a.customer_code = b.user_code
+        left join customer c on c.user_code = a.puser_code
+        <where>
+           b.is_robot = 0 AND a.payment = 5 AND a.recharge_describe != '充值赠送'
+            <if test="phone!=null and phone != ''">
+                AND c.user_mobile=#{phone}
+            </if>
+            <if test="typeId!=null and typeId != '' and typeId !=-1">
+                AND a.type=#{typeId}
+            </if>
+            <if test="registerStartTime !=null and registerStartTime !='' and registerEndTime !=null and registerEndTime !=''">
+                and a.create_time between #{registerStartTime} and #{registerEndTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="sumAgentRechargeRecord" resultType="int">
+        SELECT IF(count(1) is null,0,count(1))
+        FROM customer_recharge_record a, customer b
+        <where>
+            a.customer_code = b.user_code and b.is_robot = 0 AND a.payment = 5 AND a.recharge_describe != '充值赠送'
+            <if test="userRealName !=null and userRealName != ''">
+                AND b.user_name LIKE CONCAT("%",#{userRealName},"%")
+            </if>
+            <if test="phone!=null and phone != ''">
+                AND b.user_mobile=#{phone}
+            </if>
+            <if test="orderNo!=null and orderNo != ''">
+                AND a.recharge_code=#{orderNo}
+            </if>
+            <if test="typeId!=null and typeId != '' and typeId !=-1">
+                AND a.type=#{typeId}
+            </if>
+            <if test="status!=null and status != '' and status !=-1">
+                AND a.payment=#{status}
+            </if>
+            <if test="registerStartTime !=null and registerStartTime !='' and registerEndTime !=null and registerEndTime !=''">
+                and a.create_time between #{registerStartTime} and #{registerEndTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="sumCustomerRechargeRecord" resultType="java.lang.Double">
+        SELECT
+        IF(sum(amount) is null,0.00,sum(amount)) as amount
+        FROM customer_recharge_record a
+        LEFT join customer b on a.customer_code=b.user_code
+        <where>
+            b.is_robot=0 AND a.type != 7 AND a.type != 8
+            <if test="userRealName !=null and userRealName != ''">
+                AND b.user_name LIKE CONCAT("%",#{userRealName},"%")
+            </if>
+            <if test="phone!=null and phone != ''">
+                AND b.user_mobile=#{phone}
+            </if>
+            <if test="orderNo!=null and orderNo != ''">
+                AND a.recharge_code=#{orderNo}
+            </if>
+            <if test="typeId!=null and typeId !=-1">
+                AND a.type=#{typeId}
+            </if>
+            <choose>
+                <when test="status!=null and status != '' and status !=-1">
+                    AND a.payment=#{status}
+                </when>
+                <otherwise>
+                    AND a.payment!=8
+                </otherwise>
+            </choose>
+            <if test="registerStartTime !=null and registerStartTime !=''">
+                <![CDATA[ AND a.create_time>=#{registerStartTime}]]>
+            </if>
+            <if test="registerEndTime !=null and registerEndTime !=''">
+                <![CDATA[AND a.create_time<=#{registerEndTime}]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="withdrawPriceTotal" resultType="double">
+        SELECT IF(SUM(withdraw_price) is null,0.00,SUM(withdraw_price))
+        FROM customer_employ_tixian_record ct, customer c
+        WHERE 1=1
+        AND ct.customer_code = c.user_code
+        <if test="userRealName!=null and userRealName != ''">
+            AND c.user_name LIKE CONCAT("%",#{userRealName},"%")
+        </if>
+        <if test="phone !=null and phone != ''">
+            AND ct.phone = #{phone}
+        </if>
+        <if test="status !=null and status != '' and status != -1 ">
+            AND ct.state = #{status}
+        </if>
+        <if test="typeId !=null and typeId != '' and typeId != -1 ">
+            AND ct.payment = #{typeId}
+        </if>
+        <if test="applyStartTime!=null and applyStartTime != ''">
+            <![CDATA[ AND ct.application_date >= #{applyStartTime}]]>
+        </if>
+
+        <if test="applyEndTime!=null and applyEndTime != ''">
+            <![CDATA[ AND ct.application_date < #{applyEndTime}]]>
+        </if>
+
+        <if test="registerStartTime !=null and registerStartTime != ''">
+            <![CDATA[ AND ct.assess_completion_date > #{registerStartTime}]]>
+        </if>
+        <if test="registerEndTime !=null and registerEndTime != ''">
+            <![CDATA[  AND ct.assess_completion_date < #{registerEndTime}]]>
+        </if>
+    </select>
+
+    <select id="sumCustomerRechargeByGoodsType" resultType="java.lang.Double">
+        select IF(SUM(amount) is null,0.00,SUM(amount)) from customer_recharge_record where goods_type_id=1 and  to_days(create_time) = to_days(now());
+    </select>
+</mapper>

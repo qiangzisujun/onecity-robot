@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.GoodsFavouriteMapper">
+
+    <select id="selectGoodsNosByUserCode" resultType="java.lang.String">
+        select
+        group_concat(f.`goods_no`) goodsNos
+        from
+        goods_favourite f
+        where f.`customer_code` = #{userCode} and f.`goods_no`=#{goodsNo}
+    </select>
+
+    <select id="buyLists" resultType="com.tangchao.shop.vo.OrderNoteVO">
+        SELECT
+        MAX((
+        SELECT
+        user_name
+        FROM
+        customer
+        WHERE
+        user_code = l.result_user_code
+        )) AS winnersName,
+        MAX(l.goods_no) AS goodsNo,
+        gs.goods_id AS goodsId,
+        gs.buy_size AS buySize ,
+        gs.buy_index AS buyIndex,
+        gs.goods_inv AS goodsInv,
+        SUM(length(l.lottery_code) / 8) count,
+        MAX(l.goods_stage) AS goodsStage,
+        MAX(l.is_winning) AS isWinning,
+        MAX(l.result_user_code) AS result_userCode,
+        MAX(gs.award_results) AS lotteryCode,
+        max(og.goods_name) AS goodsName,
+        MAX(og.goods_img) AS goodsImg,
+        MAX(gs.is_activity) AS isActivity
+        FROM
+        lottery l
+        INNER JOIN order_goods og ON (og.id = l.order_goods_id)
+        INNER JOIN goods_stage gs ON (gs.id = og.stage_id)
+        <where>
+            1 = 1
+            <if test="null != openWinningStatus">
+                <!-- 未开奖 -->
+                <if test="0 == openWinningStatus">
+                    and l.is_winning = 0
+                </if>
+                <!-- 已开奖 -->
+                <if test="0 != openWinningStatus">
+                    and l.is_winning != 0
+                </if>
+            </if>
+            AND l.customer_code = #{userCode}
+        </where>
+        GROUP BY
+        og.stage_id
+        ORDER BY MAX(l.create_time) desc
+    </select>
+
+    <select id="findAmountSum" resultType="Double">
+        SELECT COALESCE(SUM(amount) ,0)
+        FROM customer_recharge_record
+        <where>
+            <if test="userCode !=0 and userCode !=''">
+                AND customer_code=#{userCode}
+            </if>
+            <if test="type != null and type != '' and type">
+                AND type=#{type}
+            </if>
+        </where>
+    </select>
+
+    <select id="findScoreGiveSum" resultType="Double">
+        select sum(score) from customer_score_detail a
+        where a.customer_code=#{userCode} and a.data_src &lt;&gt; 5
+    </select>
+
+    <select id="findScoreReduceSum" resultType="Double">
+        select sum(score) from customer_score_detail a
+        where a.customer_code=#{userCode} and a.data_src = 5
+    </select>
+
+    <select id="countGoodsFavourite" resultType="int">
+        select IF(count(id) is null,0,count(id)) from goods_favourite where customer_code=#{customerCode}
+    </select>
+</mapper>

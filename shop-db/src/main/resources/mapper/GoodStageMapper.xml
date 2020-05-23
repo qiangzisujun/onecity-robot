@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.GoodsStageMapper">
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.GoodsStage">
+        <id column="id" property="id" />
+        <result column="flag" property="flag" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="sell_start_time" property="sellStartTime" />
+        <result column="goods_hot" property="goodsHot" />
+        <result column="stage_index" property="stageIndex" />
+        <result column="goods_id" property="goodsId" />
+        <result column="type_id" property="typeId" />
+        <result column="goods_no" property="goodsNo" />
+        <result column="goods_name" property="goodsName" />
+        <result column="goods_brand" property="goodsBrand" />
+        <result column="goods_spec" property="goodsSpec" />
+        <result column="goods_inv" property="goodsInv" />
+        <result column="goods_price" property="goodsPrice" />
+        <result column="goods_picture" property="goodsPicture" />
+        <result column="goods_info_picture" property="goodsInfoPicture" />
+        <result column="goods_code" property="goodsCode" />
+        <result column="is_show_order" property="isShowOrder" />
+        <result column="recovery_price" property="recoveryPrice" />
+        <result column="buy_num" property="buyNum" />
+        <result column="buy_price" property="buyPrice" />
+        <result column="buy_size" property="buySize" />
+        <result column="buy_index" property="buyIndex" />
+        <result column="is_award" property="isAward" />
+        <result column="full_time" property="fullTime" />
+        <result column="award_results" property="awardResults" />
+        <result column="open_time" property="openTime" />
+        <result column="is_activity" property="isActivity" />
+        <result column="activity_id" property="activityId" />
+        <result column="jack_pot_now" property="jackPotNow" />
+        <result column="jack_pot_all" property="jackPotAll" />
+        <result column="jack_pot_type" property="jackPotType" />
+        <result column="cust_code" property="custCode" />
+
+    </resultMap>
+
+    <resultMap id="SupperResultMap" extends="BaseResultMap" type="com.tangchao.shop.pojo.GoodsStage">
+        <result column="maxStageIndex" property="maxStageIndex" />
+    </resultMap>
+
+    <select id="selectOpeningGoodsList" resultType="com.tangchao.shop.pojo.GoodsStage">
+        SELECT
+            s.`id` id,
+            s.`stage_index` stageIndex,
+            s.`goods_no` goodsNo,
+            s.`goods_name` goodsName,
+            s.`goods_brand` goodsBrand,
+            s.`goods_spec` goodsSpec,
+            s.`goods_price` goodsPrice,
+            s.`goods_picture` goodsPicture,
+            s.`is_activity` isActivity,
+            s.`full_time` fullTime,
+            s.`open_time` openTime
+        FROM goods_stage s
+        WHERE s.`flag` = 0
+        AND s.`full_time` > #{awardTime}
+    </select>
+
+    <select id="selectOpenGoodsList" resultType="com.tangchao.shop.vo.GoodsLotteryVO">
+        select c.`user_name` userName,c.user_portrait userIcon,c.user_code userCode,
+        length(l.`lottery_code`) lotteryCode,l.`result_code` resultCode,s.`id` id,
+        s.`goods_picture` goodsPicture,s.`is_activity` isActivity,s.`full_time` fullTime,l.open_winning_time as openTime,
+        s.stage_index as stageId,s.goods_no as goodsNo,s.is_award as isAward,s.create_time as createTime
+        from goods_stage s
+        left join lottery l on l.`is_winning` = 2 and l.`stage_id` = s.`id`
+        left join customer c on c.`flag` = 0 and l.`result_user_code` = c.`user_code`
+        <where>
+            s.`is_award` = 1
+            <if test="fullTime != null">
+                and s.`full_time` > #{fullTime}
+            </if>
+            and s.`flag` = 0 order by s.`full_time` desc
+        </where>
+    </select>
+
+    <select id="selectGoodsTypeList" resultType="com.tangchao.shop.vo.GoodsTypeVO">
+        select t.`id` id,t.`type_name` typeName,COUNT(t.`id`) countNum,GROUP_CONCAT(s.`id`) stageIds
+        from goods_stage s
+        left join goods_type t on t.`flag` = 0 and s.`type_id` = t.`id`
+        where s.`is_award` = 0 and s.`flag` = 0 and s.`is_activity` = 2
+        group by t.`id`
+        order by t.`type_sort` desc
+    </select>
+
+    <select id="getGoodsStageByNo" resultType="com.tangchao.shop.vo.GoodsStageInfoVO" parameterType="map">
+        select a.id,a.flag,a.sell_start_time as sellStartTime,a.goods_hot as goodsHot,a.stage_index as
+        stageIndex,a.goods_id as goodsId
+        ,a.type_id as typeId,a.goods_no as goodsNo,a.goods_name as goodsName,a.goods_brand as goodsBrand,a.goods_spec as
+        goodsSpec,
+        a.goods_inv as goodsInv,a.goods_price as goodsPrice,a.goods_picture as goodsPicture,a.goods_info_picture as
+        goodsInfoPicture,
+        a.goods_code as goodsCode,a.is_show_order as isShowOrder,a.recovery_price as recoveryPrice,a.buy_num as buyNum,
+        a.buy_price as buyPrice,a.buy_size as buySize,a.buy_index as buyIndex,a.is_award as isAward,a.full_time as
+        fullTime,
+        a.award_results as awardResults,a.open_time as openTime,a.is_activity as isActivity,
+        (select stage_index from goods_stage b where b.id =a.id order by id desc limit 1) as maxStageIndex from
+        goods_stage a
+        <where>
+            1=1
+            <if test="goodsNo!=null">
+                and a.goods_no=#{goodsNo}
+            </if>
+            <if test="stageId !=null">
+                and a.id=#{stageId}
+            </if>
+            <if test="stageIndex>0">
+                and stage_index=#{stageIndex}
+            </if>
+        </where>
+        order by stage_index desc limit 1
+    </select>
+
+    <select id="selectMaxIndexByGoodsId" resultType="java.lang.Integer">
+        select stage_index from goods_stage where goods_id =#{goodsId} order by id desc limit 1
+    </select>
+
+    <select id="selectMaxIndexByGoodsNo" resultType="java.lang.Integer">
+        select id from goods_stage where goods_no =#{goodsNo} order by id desc limit 1
+    </select>
+
+    <select id="getGoodsStageInfo" resultType="com.tangchao.shop.pojo.GoodsStage" parameterType="int">
+        select * from goods_stage where id=#{stageId} and flag=0
+    </select>
+
+    <select id="getGoodsStageInfoById" resultMap="SupperResultMap">
+        select a.*,(select MAX(b.id) from goods_stage b where b.goods_no=a.goods_no) as maxStageIndex from goods_stage a where a.id=#{stageId}
+    </select>
+    <!-- 查询等待开奖的商品列表 -->
+    <select id="waitOpenWinning" resultMap="BaseResultMap">
+        select
+        *
+        from goods_stage
+        <where>
+            1=1
+            <!-- 满团状态 -->
+            and is_award = 2
+            <!-- 是否活动商品 -->
+            <if test="isActivity != null">
+                and is_activity = #{isActivity}
+            </if>
+            <!-- 满足开奖时间 -->
+            and #{nowTime} >=  DATE_ADD(full_time,INTERVAL #{second} second)
+            /*order by full_time asc*/
+            limit 50
+        </where>
+    </select>
+
+    <select id="selectOpenGoods" resultType="java.util.HashMap">
+        select
+            c.`user_name` userName,c.user_portrait userIcon,c.user_code userCode,c.`is_robot` isRobot,
+            length(l.`lottery_code`) lotteryCode,
+            l.`result_code` resultCode,
+            s.`id` id,
+            s.`goods_picture` goodsPicture,
+            s.`full_time` fullTime,
+            s.`goods_name` goodsName,
+            c.`user_mobile` userMobile,
+            s.`open_time` openTime
+        from goods_stage s
+        left join lottery l on l.`is_winning` = 2 and l.`stage_id` = s.`id`
+        left join customer c on c.`flag` = 0 and l.`result_user_code` = c.`user_code`
+        where s.`id` = #{stageId} and s.`flag` = 0
+    </select>
+
+    <select id="countOpenGoods" resultType="int">
+        select IF(count(1) is null,0,count(1))
+        from goods_stage s
+        left join lottery l on l.`is_winning` = 2 and l.`stage_id` = s.`id`
+        left join customer c on c.`flag` = 0 and l.`result_user_code` = c.`user_code`
+        <where>
+            s.`is_award` = 1 and s.`flag` = 0
+            <if test="fullTime != null">
+                and s.`full_time` > #{fullTime}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateGoodsRobotSet" parameterType="com.tangchao.shop.pojo.GoodsStage">
+        update goods_stage a
+        <set>
+            <if test="jackPotAll !=null">
+                a.jack_pot_all=#{jackPotAll},
+            </if>
+            <if test="jackPotType !=null">
+                a.jack_pot_type=#{jackPotType}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <update id="updateGoodsStageByCustCode" parameterType="com.tangchao.shop.pojo.GoodsStage">
+        update goods_stage a
+        <set>
+            <if test="custCode !=null">
+                a.cust_code=#{custCode},
+            </if>
+            <if test="lastModifyId !=null">
+                a.last_modify_id=#{lastModifyId}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <update id="updateStageHotByGoodsId">
+        update goods_stage set goods_hot = #{goodsHot} where is_award = 0 and goods_id = #{goodsId}
+    </update>
+
+    <select id="selectBuyDetail" resultType="com.tangchao.shop.vo.OrderNoteVO">
+        SELECT
+        (SELECT user_name FROM customer WHERE user_code = l.result_user_code ) AS winnersName,
+        l.goods_no as goodsNo,
+        gs.buy_size as buySize,
+        gs.buy_index as buyIndex,
+        gs.goods_inv as goodsInv,
+        length( l.lottery_code ) / 8 AS count,
+        l.goods_stage as goodsStage,
+        l.lottery_code as lotteryCode,
+        l.create_time as createTime,
+        l.is_winning as isWinning,
+        l.result_user_code as resultUserCode,
+        l.open_winning_time as openWinningTime,
+        og.goods_name as goodsName,
+        og.goods_img as goodsImg
+        FROM
+        lottery l
+        INNER JOIN order_goods og ON (og.id = l.order_goods_id)
+        INNER JOIN goods_stage gs ON (gs.id = og.stage_id)
+        <where>
+            1 = 1
+            <if test="null != openWinningStatus">
+                <!-- 未开奖 -->
+                <if test="0 == openWinningStatus">
+                    and l.is_winning = 0
+                </if>
+                <!-- 已开奖 -->
+                <if test="0 !=openWinningStatus">
+                    and l.is_winning != 0
+                </if>
+            </if>
+            AND l.customer_code = #{userCode}
+            AND l.goods_no = #{goodsNo}
+            AND l.goods_stage = #{goodsStage}
+            ORDER BY l.create_time DESC
+        </where>
+    </select>
+
+    <select id="getRandomGoodsStage" resultType="com.tangchao.shop.vo.GoodsStageVO">
+        SELECT
+        a.buy_index AS buyIndex,
+        a.buy_num AS buyNum,
+        a.buy_price AS buyPrice,
+        a.buy_size AS buySize,
+        a.goods_name AS goodsName,
+        a.goods_no AS goodsNo,
+        a.goods_picture AS goodsPicture,
+        a.id as id,
+        a.goods_price as goodsPrice
+        FROM goods_stage a
+        WHERE a.flag = 0 AND a.is_award = 0 AND a.is_activity != 1
+        GROUP BY a.goods_id
+        ORDER BY RAND()
+        LIMIT 6
+    </select>
+
+    <select id="getGoodsStageIDByGoodsTypeId" resultType="java.lang.Long">
+        select a.id from goods_stage a
+        left join goods_info b on a.goods_id=b.id
+        left join goods_type c on c.id=b.type_id and c.flag=0
+        where a.is_award=0 and c.id=#{typeId}
+    </select>
+
+    <select id="getTest" resultType="java.util.HashMap">
+        select b.goods_id,b.goods_no from goods_robot a
+        LEFT JOIN goods_stage b on b.id=a.goods_period_id
+        where b.is_award=1 limit 50
+    </select>
+
+    <update id="updateGoodsRobotTest">
+        update goods_robot set goods_period_id=#{maxStageId}  where goods_id=#{goodsId}
+    </update>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangchao.shop.mapper.ShopGoodsMapper">
+
+    <select id="findAll" resultType="java.util.Map">
+        SELECT
+            s.title,
+            s.sort,
+            s.sales_volume,
+            s.goods_type_id,
+            s.stock,
+            s.price_forme,
+            s.price,
+            s.integral,
+            s.commission,
+            s.discount,
+            s.is_special_price,
+            s.is_sell_well,
+            s.is_return,
+            s.is_speed,
+            s.is_strict
+        FROM
+            shop_goods s
+        WHERE
+            s.datalevel = 1
+    </select>
+
+</mapper>

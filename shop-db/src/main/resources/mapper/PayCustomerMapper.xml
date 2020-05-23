@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.PayCustomerMapper">
+    <select id="getPayCustomer" resultType="com.tangchao.shop.pojo.PayCustomer">
+        select id,cust_img as custImg,create_date as createDate,status from cms_pay_customer  where 1 = 1 and status=0 order by rand() desc limit 1
+    </select>
+
+    <resultMap id="PaymentRecordBaseResultMap" type="com.tangchao.shop.pojo.PaymentRecord">
+        <id column="id" property="id" />
+        <result column="user_mobile" property="userMobile" />
+        <result column="head_portrait" property="headPortrait" />
+        <result column="realname" property="realname" />
+        <result column="wechat_head_portrait" property="wechatHeadPortrait" />
+        <result column="wechat_realname" property="wechatRealname" />
+        <result column="payment_code_type" property="paymentCodeType" />
+        <result column="payment_code_price" property="paymentCodePrice" />
+        <result column="payment_code_image" property="paymentCodeImage" />
+        <result column="customer_code" property="customerCode" />
+        <result column="create_time" property="createTime" />
+        <result column="recharge_statu" property="rechargeStatu" />
+        <result column="flag" property="flag" />
+        <result column="userMoney" property="userMoney" />
+    </resultMap>
+    <select id="selectPaymentRecordList" resultMap="PaymentRecordBaseResultMap">
+        select a.*,b.user_money as userMoney  from cms_payment_record a
+        left join customer_info b on a.customer_code=b.customer_code
+        <where>
+            1 = 1
+            <if test="mobile != null and mobile != ''">
+                and user_mobile = #{mobile}
+            </if>
+            <if test="weChatNickName != null and weChatNickName != ''">
+                and wechat_realname LIKE CONCAT('%',#{weChatNickName},'%')
+            </if>
+            <if test="typeId != null and typeId != ''">
+                and recharge_statu = #{typeId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and create_time >=#{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                <![CDATA[ and create_time < #{endDate}]]>
+            </if>
+            and flag = '0'
+        </where>
+    </select>
+</mapper>

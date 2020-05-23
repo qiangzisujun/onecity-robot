@@ -1,0 +1,78 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB # 限制文件上传的大小
+  datasource:
+    druid:
+      first:  #数据源1
+        url: jdbc:mysql://120.76.174.8:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        username: root
+        password: tangchao@2020
+      second:  #数据源2
+        url: jdbc:mysql://120.76.174.8:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        username: root
+        password: tangchao@2020
+      driverClassName: com.mysql.jdbc.Driver
+      #最大活跃数
+      maxActive: 20
+      #初始化数量
+      initialSize: 1
+      #最大连接等待超时时间
+      maxWait: 60000
+      #打开PSCache，并且指定每个连接PSCache的大小
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      #通过connectionProperties属性来打开mergeSql功能；慢SQL记录
+      #connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      minIdle: 1
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: select 1 from dual
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      #配置监控统计拦截的filters，去掉后监控界面sql将无法统计,'wall'用于防火墙
+      filters: stat, wall, log4j
+  redis:
+    host: 192.168.0.218
+    password: 123456
+  jackson:
+    #参数意义：
+    #JsonInclude.Include.ALWAYS              默认
+    #JsonInclude.Include.NON_DEFAULT     属性为默认值不序列化
+    #JsonInclude.Include.NON_EMPTY         属性为 空（””） 或者为 NULL 都不序列化
+    #JsonInclude.Include.NON_NULL           属性为NULL   不序列化
+    default-property-inclusion: ALWAYS
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+server:
+  port: 8090
+shop:
+  worker:
+    workerId: 1
+    dataCenterId: 1
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+fdfs:
+  so-timeout: 1501
+  connect-timeout: 601
+  thumb-image: # 缩略图
+    width: 60
+    height: 60
+  tracker-list: # tracker地址
+    - 192.168.0.218:22122
+tangchao:
+  secret: ly@Login(Auth}*^31)&chaoyuan%f3q2 # 登录校验的密钥
+  pubKeyPath: D:\rsa.pub # 公钥地址
+  priKeyPath: D:\rsa.pri # 私钥地址
+  upload:
+    baseUrl: http://test.banmatongxiao.com/
+    allowTypes:
+      - image/jpeg
+      - image/png
+      - image/bmp
+      - image/gif

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.CmsAdvertMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.AdvertGroup">
+        <id column="id" property="id" />
+        <result column="group_name" property="groupName" />
+        <result column="group_name_us" property="groupNameUs" />
+        <result column="group_describe" property="groupDescribe" />
+        <result column="group_code" property="groupCode" />
+        <result column="flag" property="flag" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="user_name" property="lastModifyName" />
+    </resultMap>
+
+
+
+
+    <resultMap id="ResultMap" type="com.tangchao.shop.pojo.CmsAdvert">
+        <id column="id" property="id" />
+        <result column="ad_describe" property="adDescribe" />
+        <result column="ad_describe_us" property="adDescribeUs" />
+        <result column="ad_href" property="adHref" />
+        <result column="ad_img" property="adImg" />
+        <result column="ad_code" property="adCode" />
+        <result column="ad_background_color" property="adBackgroundColor" />
+        <result column="ad_sort" property="adSort" />
+        <result column="group_code" property="groupCode" />
+        <result column="flag" property="flag" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="group_name" property="groupName" />
+        <result column="group_name_us" property="groupNameUs" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,group_name,group_name_us,group_describe,group_code,flag,
+        create_id,create_time,last_modify_id,last_modify_time
+    </sql>
+
+
+    <!-- 根据条件查询 SEO列表 -->
+    <select id="selectList" resultMap="BaseResultMap">
+        select
+        cag.*,sm.user_name
+        from cms_advert_group cag
+        INNER JOIN sys_manager sm ON sm.id = cag.last_modify_id
+        <where>
+            1=1
+            <!-- 查询条件 -->
+            and cag.flag &lt;> -1
+        </where>
+    </select>
+
+    <select id="selectAdvertList" resultMap="ResultMap">
+        select
+        cag.group_name,cag.group_name_us,ca.*
+        from cms_advert ca
+        inner join cms_advert_group cag on ca.group_code = cag.group_code
+        <where>
+            1=1
+            <!-- 查询条件 -->
+            and ca.flag &lt;> -1
+        </where>
+    </select>
+</mapper>

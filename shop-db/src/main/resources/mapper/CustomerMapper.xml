@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.CustomerMapper">
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.Customer">
+        <id column="id" property="id" />
+        <result column="user_code" property="userCode" />
+        <result column="user_name" property="userName" />
+        <result column="login_pwd" property="loginPwd" />
+        <result column="user_mobile" property="userMobile" />
+        <result column="user_email" property="userEmail" />
+        <result column="user_real_name" property="userRealName" />
+        <result column="user_portrait" property="userPortrait" />
+        <result column="is_robot" property="isRobot" />
+        <result column="is_supplier" property="isSupplier" />
+        <result column="invite_id" property="inviteId" />
+        <result column="flag" property="flag" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="is_collage_record" property="isCollageRecord" />
+        <result column="is_obtain_goods" property="isObtainGoods" />
+        <result column="is_show_order" property="isShowOrder" />
+        <result column="black_statu" property="blackStatu" />
+        <result column="account_statu" property="accountStatu" />
+        <result column="payAmountSum" property="payAmountSum" />
+        <result column="winningTotal" property="winningTotal" />
+        <result column="userScore" property="userScore" />
+        <result column="userMoney" property="userMoney" />
+        <result column="employMoney" property="employMoney" />
+        <result column="inviteCode" property="inviteCode" />
+    </resultMap>
+
+    <resultMap id="BaseResultMap1" type="com.tangchao.shop.vo.adminVo.CustomerVO">
+        <id column="id" property="id" />
+        <result column="user_code" property="userCode" />
+        <result column="user_name" property="userName" />
+        <result column="login_pwd" property="loginPwd" />
+        <result column="user_mobile" property="userMobile" />
+        <result column="user_email" property="userEmail" />
+        <result column="user_real_name" property="userRealName" />
+        <result column="user_portrait" property="userPortrait" />
+        <result column="is_robot" property="isRobot" />
+        <result column="is_supplier" property="isSupplier" />
+        <result column="invite_id" property="inviteId" />
+        <result column="flag" property="flag" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="is_collage_record" property="isCollageRecord" />
+        <result column="is_obtain_goods" property="isObtainGoods" />
+        <result column="is_show_order" property="isShowOrder" />
+        <result column="black_statu" property="blackStatu" />
+        <result column="account_statu" property="accountStatu" />
+        <result column="payAmountSum" property="payAmountSum" />
+        <result column="winningTotal" property="winningTotal" />
+        <result column="userScore" property="userScore" />
+        <result column="userMoney" property="userMoney" />
+        <result column="employMoney" property="employMoney" />
+        <result column="inviteCode" property="inviteCode" />
+        <result column="buy_period" property="buyPeriod" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_code,user_name,login_pwd,user_mobile,user_email,user_real_name,user_portrait,
+        is_robot,is_supplier,invite_id,flag,create_id,create_time,
+        last_modify_id,last_modify_time,is_collage_record,is_obtain_goods,is_show_order,black_statu
+    </sql>
+
+
+    <update id="updateAccountNumber">
+        update customer
+        <set>
+            <if test="portrait!=null and portrait != ''">
+              user_portrait=#{portrait},
+            </if>
+           <if test="realname!=null and realname != ''">
+               user_name=#{realname},
+            </if>
+            <if test="isCollageRecord!=null ">
+                is_collage_record=#{isCollageRecord},
+            </if>
+            <if test="isObtainGoods!=null ">
+                is_obtain_goods=#{isObtainGoods}
+            </if>
+        </set>
+        where user_code=#{userCode}
+    </update>
+    <update id="updatePass">
+        update customer set login_pwd=#{pwd1} where user_code=#{userCode}
+    </update>
+
+    <!-- 根据条件查询账号列表 -->
+    <select id="selectBlacklist" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from customer where black_statu = '1'
+    </select>
+
+    <select id="findCustomerInfo" resultMap="BaseResultMap">
+        SELECT c.* FROM customer c,customer_info ci
+        WHERE c.user_code = ci.customer_code AND ci.invite_code = #{inviteCode}
+    </select>
+
+    <!-- 查询网站会员总数 -->
+    <select id="findCustomerSum" resultType="Integer">
+        select if(count(*) is null,0,count(*)) from customer
+        <where>
+            1 = 1
+            <!-- 查询条件 -->
+            and flag &lt;> -1
+        </where>
+    </select>
+
+    <!-- 查询普通会员总数 -->
+    <select id="findMemberCustomerSum" resultType="Integer">
+        select if(count(*) is null,0,count(*)) from customer
+        <where>
+            1 = 1
+            <!-- 查询条件 -->
+            and flag &lt;> -1
+            and is_supplier  &lt;> 1
+            and is_robot &lt;> 1
+        </where>
+    </select>
+
+    <!-- 查询机器人总数 -->
+    <select id="findRobotSum" resultType="Integer">
+        select if(count(*) is null,0,count(*)) from customer
+        <where>
+            1 = 1
+            <!-- 查询条件 -->
+            and flag &lt;> -1
+            and is_robot = 1
+        </where>
+    </select>
+
+    <!-- 查询充值会员总数 -->
+    <select id="findSupplierSum" resultType="Integer">
+        select if(count(*) is null,0,count(*)) from customer
+        <where>
+            1 = 1
+            <!-- 查询条件 -->
+            and flag &lt;> -1
+            and is_supplier = 1
+            and is_robot &lt;> 1
+        </where>
+    </select>
+
+    <select id="selectCustomerList" resultMap="BaseResultMap1" parameterType="com.tangchao.shop.dto.adminDTO.CustomerDTO">
+       select a.*,(SELECT COALESCE(SUM(amount) ,0) FROM customer_recharge_record where customer_code=a.user_code and type=2) as payAmountSum,
+        (select COALESCE(SUM(goods_price),0) from winning_order where customer_code =a.user_code) as winningTotal ,
+        b.invite_code as inviteCode,b.user_money as userMoney,b.user_score as userScore, b.employ_money as employMoney
+        from customer a
+        left join customer_info b on b.customer_code=a.user_code
+        <where>
+            a.flag=0
+            <if test="status!=null and status!=''">
+                and a.black_statu=#{status}
+            </if>
+            <if test="phone!=null and phone!=''">
+                and a.user_mobile=#{phone}
+            </if>
+            <if test="userRealName!=null and userRealName!=''">
+                and a.user_name like CONCAT("%",#{userRealName},"%")
+            </if>
+            <if test="inviteId!=null and inviteId!=''">
+                and a.invite_id like CONCAT("%",#{inviteId},"%")
+            </if>
+            <if test="inviteCode!=null and inviteCode!=''">
+                and b.invite_code like CONCAT("%",#{inviteCode},"%")
+            </if>
+            <if test="typeId!=null">
+                <if test="typeId==1">
+                    and a.is_robot=0 and is_supplier=0
+                </if>
+                <if test="typeId==2">
+                    and a.is_robot=1
+                </if>
+                <if test="typeId==3">
+                    and is_supplier=1
+                </if>
+            </if>
+            <!--开始时间和结束时间都不为空-->
+            <if test="registerStartTime !=null and registerStartTime!='' and registerEndTime !=null and registerEndTime !=''">
+                and a.create_time BETWEEN #{registerStartTime} AND #{registerEndTime}
+            </if>
+            <!--只有开始时间-->
+            <if test="registerStartTime !=null and registerStartTime!='' and (registerEndTime ==null || registerEndTime =='')">
+                <![CDATA[and a.create_time > #{registerStartTime}]]>
+            </if>
+            <!--只有结束时间-->
+            <if test="(registerEndTime ==null and registerEndTime =='') and registerEndTime !=null and registerEndTime !=''">
+                <![CDATA[  and a.create_time < #{registerEndTime}]]>
+            </if>
+            <if test="byDate!=null and byDate !=''">
+                and a.is_robot=1 and buy_period=#{byDate}
+            </if>
+        </where>
+        order by a.create_time DESC
+    </select>
+
+    <select id="getCustomerListByCode" resultType="com.tangchao.shop.pojo.Customer">
+        select a.user_code as userCode,a.user_mobile as userMobile from customer a where a.user_code in
+        <foreach collection="userCodeList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectProxyRechargeList" resultType="java.util.HashMap">
+        select
+        r.`id` id,
+        c.`user_name` userName,
+        c.`user_mobile` userMobile,
+        r.`amount` amount,
+        r.`create_time` createTime
+        from
+        customer_recharge_record r
+        left join customer c
+        on c.`flag` = 0
+        and r.`customer_code` = c.`user_code`
+        where 1 = 1
+        <!--根据用户手机号查询 -->
+        <if test="userMobile != null and userMobile !=''">
+            and c.`user_mobile` = #{userMobile}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[ AND r.`create_time` >= #{startDate}]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[ AND r.`create_time`  <= #{endDate} ]]>
+        </if>
+        and r.`puser_code` = #{userCode}
+        order by r.`create_time` desc
+    </select>
+
+    <select id="countProxyRechargeList" resultType="java.lang.Double">
+        select if(sum(r.`amount`) is null,0.00,sum(r.`amount`)) from
+        customer_recharge_record r
+        left join customer c
+        on c.`flag` = 0
+        and r.`customer_code` = c.`user_code`
+        where 1 = 1
+        <!--根据用户手机号查询 -->
+        <if test="userMobile != null and userMobile !=''">
+            and c.`user_mobile` = #{userMobile}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[ AND r.`create_time` >= #{startDate}]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[ AND r.`create_time`  <= #{endDate} ]]>
+        </if>
+        and r.`puser_code` = #{userCode}
+        order by r.`create_time` desc
+    </select>
+
+    <select id="getInviteNum" resultType="int">
+        select IF(count(id) is null,0,count(id)) from customer where invite_id=#{inviteCode} and flag=0
+    </select>
+
+    <update id="updateByIds">
+        update customer set buy_period=#{type}  where id in
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:mysql://172.18.33.53:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: tangchao@2020
+    driverClassName: com.mysql.jdbc.Driver
+  redis:
+    host: 172.18.33.53
+    password: tangchao@2020
+  jackson:
+    #参数意义：
+    #JsonInclude.Include.ALWAYS              默认
+    #JsonInclude.Include.NON_DEFAULT     属性为默认值不序列化
+    #JsonInclude.Include.NON_EMPTY         属性为 空（””） 或者为 NULL 都不序列化
+    #JsonInclude.Include.NON_NULL           属性为NULL   不序列化
+    default-property-inclusion: ALWAYS
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+server:
+  port: 8877
+shop:
+  worker:
+    workerId: 1
+    dataCenterId: 1
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+fdfs:
+  so-timeout: 1501
+  connect-timeout: 601
+  thumb-image: # 缩略图
+    width: 60
+    height: 60
+  tracker-list: # tracker地址
+    - 172.18.33.53:22122
+tangchao:
+  secret: ly@Login(Auth}*^31)&tangchao%f3q2 # 登录校验的密钥
+  pubKeyPath: /data/jwt/rsa.pub # 公钥地址
+  priKeyPath: /data/jwt/rsa.pri # 私钥地址
+  upload:
+    baseUrl: http://hao.banmatongxiao.com/
+    allowTypes:
+      - image/jpeg
+      - image/png
+      - image/bmp
+      - image/gif

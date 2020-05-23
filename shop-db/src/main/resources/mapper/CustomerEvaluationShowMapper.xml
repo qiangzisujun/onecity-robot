@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.CustomerEvaluationShowMapper">
+
+    <select id="selectGoodsShowList" resultType="com.tangchao.shop.vo.OrderShowVO">
+        select s.`stage_id` stageId, s.`title` title, s.`content` content,s.`create_time` createTime,
+        s.`praise_num` praiseNum, c.`user_name` userName, group_concat(distinct i.`img_url`) imgUrls,count(distinct
+        e.`id`) replyNum
+        from customer_evaluation_show s
+        left join customer_evaluation e on s.`id` = e.`show_id`
+        left join customer_evaluation_show_img i on s.`id` = i.`show_id`
+        left join customer c on c.`flag` = 0 and c.`user_code` = s.`user_code`
+        where s.`status` = 3 and s.`is_delete` = 0
+        <if test="userCode != null">
+            and c.`user_code` = ${userCode}
+        </if>
+        group by s.`id`,c.`user_name`
+    </select>
+
+    <select id="getCustomerEvaluationShowList" resultType="com.tangchao.shop.pojo.CustomerEvaluationShow">
+        SELECT a.*,a.application_date as applicationDate,c.user_mobile as userMobile,c.user_name as userName,g.goods_name as goodsName, (select order_no from order_goods aa where 				aa.stage_id=a.stage_id and aa.goods_no=a.goods_no limit 1) as orderNo
+        FROM customer_evaluation_show a
+        left join customer c on a.user_code = c.user_code
+        left join goods_info g on a.goods_no=g.goods_no
+        <if test="userRealName!=null and userRealName != ''">
+            AND c.user_name like CONCAT("%",#{userRealName},"%")
+        </if>
+        <if test="phone!=null and phone != ''">
+            AND c.user_mobile=#{phone}
+        </if>
+        <if test="stageId!=null and stageId != ''">
+            AND a.stage_id=#{stageId}
+        </if>
+        <if test="status!=null and status != '' and status != -1">
+            AND a.status=#{status}
+        </if>
+        <if test="registerStartTime!=null and registerStartTime != ''">
+            AND a.application_date &gt;= DATE_FORMAT(#{registerStartTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="registerEndTime!=null and registerEndTime != ''">
+            AND a.application_date &lt;= DATE_FORMAT(#{registerEndTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="applyStartTime!=null and applyStartTime != ''">
+            AND a.assess_completion_date &gt;= DATE_FORMAT(#{applyStartTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="applyEndTime!=null and applyEndTime != ''">
+            AND a.assess_completion_date &lt;= DATE_FORMAT(#{applyEndTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+    </select>
+    
+
+    <select id="findByEvaluationShowImgByShowId" resultType="java.util.HashMap">
+        SELECT img_url as imgUrl,show_id as showId
+        FROM customer_evaluation_show_img
+        where show_id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="countEvaluationShowImgByShow" resultType="int">
+        SELECT IF(count(1) is null,0,count(1))
+        FROM customer_evaluation_show a
+        left join customer c on a.user_code = c.user_code
+        left join goods_info g on a.goods_no=g.goods_no
+        <if test="userRealName!=null and userRealName != ''">
+            AND c.user_name like CONCAT("%",#{userRealName},"%")
+        </if>
+        <if test="phone!=null and phone != ''">
+            AND c.user_mobile=#{phone}
+        </if>
+        <if test="stageId!=null and stageId != ''">
+            AND a.stage_id=#{stageId}
+        </if>
+        <if test="status!=null and status != '' and status != -1">
+            AND a.status=#{status}
+        </if>
+        <if test="registerStartTime!=null and registerStartTime != ''">
+            AND a.application_date &gt;= DATE_FORMAT(#{registerStartTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="registerEndTime!=null and registerEndTime != ''">
+            AND a.application_date &lt;= DATE_FORMAT(#{registerEndTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="applyStartTime!=null and applyStartTime != ''">
+            AND a.assess_completion_date &gt;= DATE_FORMAT(#{applyStartTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="applyEndTime!=null and applyEndTime != ''">
+            AND a.assess_completion_date &lt;= DATE_FORMAT(#{applyEndTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+    </select>
+
+
+    <select id="selectList" resultType="java.util.HashMap">
+        select
+        ce.`id` id,
+        ce.`is_see` isSee,
+        ce.`content` content,
+        ce.`create_time` createTime,
+        c.`user_name` userName,
+        c.`user_mobile` userMobile,
+        gs.`goods_name` goodsName
+        from
+        customer_evaluation ce
+        left join customer c
+        on c.`user_code` = ce.`customer_code`
+        left join goods_stage gs
+        on gs.`id` = ce.`stage_id`
+        where ce.`is_delete` = 0
+        <if test="isSee != null and isSee != ''">
+            and ce.`is_see` = #{pojo.isSee}
+        </if>
+        <if test="userName != null">
+            and c.`user_name` like  CONCAT("%",#{userRealName},"%")
+        </if>
+        <if test="phone != null and phone != ''">
+            and c.`user_mobile` like CONCAT("%",#{phone},"%")
+        </if>
+        <if test="goodsName != null">
+            and gs.`goods_name` like CONCAT("%",#{goodsName},"%")
+        </if>
+        <if test="registerStartTime != null">
+            and ce.`create_time` &gt;= #{registerStartTime}
+        </if>
+        <if test="registerEndTime != null">
+            and ce.`create_time` &lt;= #{registerEndTime}
+        </if>
+        order by ce.`create_time` desc
+    </select>
+
+
+    <select id="withdrawPriceTotal" resultType="double">
+        SELECT IF(SUM(withdraw_price) is null,0.00,SUM(withdraw_price))
+        FROM customer_employ_tixian_record ct, customer c
+        WHERE 1=1
+        AND ct.customer_code = c.user_code
+        <if test="userRealName!=null and userRealName != ''">
+            AND c.user_name LIKE CONCAT("%",#{userRealName},"%")
+        </if>
+        <if test="phone !=null and phone != ''">
+            AND ct.phone = #{phone}
+        </if>
+        <if test="status !=null and status != '' and status != -1 ">
+            AND ct.state = #{status}
+        </if>
+        <if test="typeId !=null and typeId != '' and typeId != -1 ">
+            AND ct.payment = #{typeId}
+        </if>
+        <if test="applyStartTime and applyStartTime != ''">
+            AND ct.application_date >= #{applyStartTime}
+        </if>
+
+        <if test="applyEndTime and applyEndTime != ''">
+            <![CDATA[ AND ct.application_date =< #{applyEndTime}]]>
+        </if>
+
+        <if test="registerStartTime !=null and registerStartTime != ''">
+            AND ct.assess_completion_date >= #{registerStartTime}
+        </if>
+        <if test="registerEndTime !=null and registerEndTime != ''">
+            <![CDATA[  AND ct.assess_completion_date =< #{registerEndTime}]]>
+        </if>
+    </select>
+</mapper>

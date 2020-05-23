@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.CustomerScoreDetailMapper">
+
+    <!--用户积分明细-->
+    <select id="getCustomerScoreDetailByUserCode" resultType="com.tangchao.shop.vo.adminVo.CustomerScoreDetailVO">
+        select score,data_src as dataSource,order_code as orderCode,score_describe as scoreDescribe,score_flag as scoreFlag,
+        create_time as createTime
+        from customer_score_detail where customer_code=#{customerCode}
+    </select>
+
+    <select id="selectCountByUserCode" resultType="java.util.HashMap">
+        select
+          sum(if(s.`score_flag` = 1, s.`score`, 0)) income,
+          sum(if(s.`score_flag` = 2, s.`score`, 0)) expenses
+        from
+          customer_score_detail s
+        where s.`customer_code` = #{userCode}
+    </select>
+</mapper>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.TradeOrderMapper">
+
+
+	<resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.TradeOrder">
+		<id column="id" property="id" />
+		<result column="order_no" property="orderNo" />
+		<result column="purchase_code" property="purchaseCode" />
+		<result column="purchase_name" property="purchaseName" />
+		<result column="order_status" property="orderStatus" />
+		<result column="goods_total" property="goodsTotal" />
+		<result column="order_total" property="orderTotal" />
+		<result column="pay_from" property="payFrom" />
+		<result column="zip_code" property="zipCode" />
+		<result column="user_name" property="userName" />
+		<result column="user_address" property="userAddress" />
+		<result column="user_mobile" property="userMobile" />
+		<result column="consume_score" property="consumeScore" />
+		<result column="score_deduction_money" property="scoreDeductionMoney" />
+		<result column="order_score" property="orderScore" />
+		<result column="user_del_flag" property="userDelFlag" />
+		<result column="del_flag" property="delFlag" />
+		<result column="is_robot" property="isRobot" />
+		<result column="down_order_time" property="downOrderTime" />
+		<result column="pay_time" property="payTime" />
+		<result column="order_remarks" property="orderRemarks" />
+		<result column="is_auto_buy_next" property="isAutoBuyNext" />
+		<result column="pay_ip" property="payIp" />
+		<result column="min_pay_money" property="minPayMoney" />
+		<result column="is_activity" property="isActivity" />
+		<result column="black_statu" property="blackStatus" />
+	</resultMap>
+
+
+	<resultMap id="BaseResultMapExpand" type="com.tangchao.shop.vo.adminVo.TradeOrderVO">
+		<id column="id" property="id" />
+		<result column="order_no" property="orderNo" />
+		<result column="purchase_code" property="purchaseCode" />
+		<result column="purchase_name" property="purchaseName" />
+		<result column="order_status" property="orderStatus" />
+		<result column="goods_total" property="goodsTotal" />
+		<result column="order_total" property="orderTotal" />
+		<result column="pay_from" property="payFrom" />
+		<result column="zip_code" property="zipCode" />
+		<result column="user_name" property="userName" />
+		<result column="user_address" property="userAddress" />
+		<result column="user_mobile" property="userMobile" />
+		<result column="consume_score" property="consumeScore" />
+		<result column="score_deduction_money" property="scoreDeductionMoney" />
+		<result column="order_score" property="orderScore" />
+		<result column="user_del_flag" property="userDelFlag" />
+		<result column="del_flag" property="delFlag" />
+		<result column="is_robot" property="isRobot" />
+		<result column="down_order_time" property="downOrderTime" />
+		<result column="pay_time" property="payTime" />
+		<result column="order_remarks" property="orderRemarks" />
+		<result column="is_auto_buy_next" property="isAutoBuyNext" />
+		<result column="pay_ip" property="payIp" />
+		<result column="min_pay_money" property="minPayMoney" />
+		<result column="is_activity" property="isActivity" />
+		<result column="black_statu" property="blackStatus" />
+	</resultMap>
+
+
+    <select id="selectToday" resultType="Integer">
+        SELECT count( 1 ) FROM trade_order
+    	WHERE Date( down_order_time ) = curdate() AND order_status = 0
+	    AND user_del_flag = 0 AND del_flag = 0 AND is_robot = 0
+    </select>
+
+    <select id="selectYesterday" resultType="Integer">
+      SELECT count( 1 ) FROM trade_order WHERE
+	  Date( down_order_time ) = SUBDATE( curdate(), 1 ) AND order_status = 0 AND user_del_flag = 0 AND del_flag = 0 AND is_robot = 0
+    </select>
+
+    <select id="selectUnDeliverGoodsNum" resultType="Integer">
+		select count(*) from winning_order w
+		where w.`order_status` = 1 and w.`is_robot` = 0
+	</select>
+
+    <select id="selectAgentOrderToday" resultType="Integer">
+		select count(*) from fast_order f
+		where Date( create_time ) = curdate() and f.`flag` = 0
+	</select>
+
+    <select id="selectAgentOrderYesterday" resultType="Integer">
+		select count(*) from fast_order f
+		where Date( create_time ) = SUBDATE( curdate(), 1 ) and f.`flag` = 0
+	</select>
+
+    <select id="selectUnCheckAgentOrderNum" resultType="Integer">
+		select count(*) from fast_order f where f.`status_flag` = 0 and f.`flag` = 0
+	</select>
+
+    <select id="selectCustomerToday" resultType="Integer">
+		select count(*) from customer c
+		where Date(create_time ) = curdate()
+		  and c.`is_robot` = 0 and c.`is_supplier` = 0 and c.`flag` = 0
+	</select>
+
+    <select id="selectCustomerYesterday" resultType="Integer">
+		select count(*) from customer c
+		where Date(create_time ) = SUBDATE( curdate(), 1 )
+		  and c.`is_robot` = 0 and c.`is_supplier` = 0 and c.`flag` = 0
+	</select>
+
+    <select id="selectTodayScoreIncome" resultType="Double">
+		select IFNULL(sum(s.`score`),0) from customer_score_detail s
+		where Date(create_time ) = curdate() and s.`score_flag` = 1
+	</select>
+
+    <select id="selectTodayScoreExpenditure" resultType="Double">
+		select IFNULL(sum(s.`score`),0) from customer_score_detail s
+		where Date(create_time ) = curdate() and s.`score_flag` = 2
+	</select>
+
+    <select id="selectTodayAmountRecharge" resultType="Double">
+		SELECT IF(sum(amount) is null,0.00,sum(amount)) as amount
+		FROM customer_recharge_record a
+		LEFT join customer b on a.customer_code=b.user_code
+		WHERE b.is_robot=0 and a.type=1 AND Date(a.create_time ) = curdate()
+	</select>
+
+    <select id="selectTodayAmountConsumption" resultType="Double">
+		select IFNULL(sum(r.`amount`) ,0) from customer_recharge_record r
+		where  Date(create_time ) = curdate() and r.`type` = 2 AND payment in(1,2,4,5)
+	</select>
+
+    <select id="selectTodayShowNum" resultType="Integer">
+		select count(1) from customer_evaluation_show s
+		where Date(create_time ) = curdate() and s.`is_delete` = 0
+	</select>
+
+    <select id="selectTodayCommentNum" resultType="Integer">
+		select count(1) from customer_evaluation e
+		where Date(create_time ) = curdate()  and e.`is_delete` = 0
+	</select>
+
+	<!--交易订单-->
+	<select id="selectOrderList" resultMap="BaseResultMapExpand">
+		select t_order.*,cu.black_statu from trade_order t_order
+		left join customer cu on t_order.purchase_code=cu.user_code
+		<where>
+			1 = 1
+			<if test="orderNo !=null and orderNo !='' ">
+				and t_order.order_no like CONCAT(#{orderNo},"%")
+			</if>
+			<!--  根据用户名字查询 -->
+			<if test="userName!=null and userName !=''">
+				and t_order.purchase_name like CONCAT(#{userName},"%")
+			</if>
+			<!-- 过滤机器人订单 -->
+			<if test="userMobile!=null  and userMobile!=''">
+				and cu.user_mobile=#{userMobile}
+			</if>
+			<!-- 根据订单状态查询 -->
+			<if test="status !=null">
+				and t_order.order_status = #{status}
+			</if>
+
+			<!--开始时间和结束时间都不为空-->
+			<if test="createStartTime !=null and createStartTime!='' and createEndTime !=null and createEndTime !=''">
+				and t_order.create_time BETWEEN #{createStartTime} AND #{createEndTime}
+			</if>
+			<!--只有开始时间-->
+			<if test="createStartTime !=null and createStartTime!='' and (createEndTime ==null || createEndTime =='')">
+				<![CDATA[and t_order.create_time > #{createStartTime}]]>
+			</if>
+			<!--只有结束时间-->
+			<if test="(createEndTime ==null and createEndTime =='') and createEndTime !=null and createEndTime !=''">
+				<![CDATA[  and t_order.create_time < #{createEndTime}]]>
+			</if>
+			<!-- 不查询删除状态的订单 -->
+			and t_order.del_flag !=1 and t_order.is_robot=0
+		</where>
+		order by t_order.create_time desc
+	</select>
+
+	<select id="selectCountOrderTotal" resultType="java.util.HashMap">
+		select
+         SUM(t_order.`order_total`) orderTotal,
+         SUM(t_order.`goods_total`) goodsTotal
+       	from trade_order t_order
+		left join customer cu on t_order.purchase_code=cu.user_code
+		<where>
+			1 = 1
+			<if test="orderNo !=null and orderNo !='' ">
+				and t_order.order_no like CONCAT(#{orderNo},"%")
+			</if>
+			<!--  根据用户名字查询 -->
+			<if test="userName!=null and userName !=''">
+				and t_order.purchase_name like CONCAT(#{userName},"%")
+			</if>
+			<!-- 过滤机器人订单 -->
+			<if test="userMobile!=null  and userMobile!=''">
+				and cu.user_mobile=#{userMobile}
+			</if>
+			<!-- 根据订单状态查询 -->
+			<if test="status !=null">
+				and t_order.order_status = #{status}
+			</if>
+			<!--开始时间和结束时间都不为空-->
+			<if test="createStartTime !=null and createStartTime!='' and createEndTime !=null and createEndTime !=''">
+				and t_order.create_time BETWEEN #{createStartTime} AND #{createEndTime}
+			</if>
+			<!--只有开始时间-->
+			<if test="createStartTime !=null and createStartTime!='' and (createEndTime ==null || createEndTime =='')">
+				<![CDATA[and t_order.create_time > #{createStartTime}]]>
+			</if>
+			<!--只有结束时间-->
+			<if test="(createEndTime ==null and createEndTime =='') and createEndTime !=null and createEndTime !=''">
+				<![CDATA[  and t_order.create_time < #{createEndTime}]]>
+			</if>
+			<!-- 不查询删除状态的订单 -->
+			and t_order.del_flag !=1 and t_order.is_robot=0
+		</where>
+	</select>
+
+	<select id="getOrderSum" resultType="int">
+		select count(1) from trade_order t_order
+		<where>
+			t_order.del_flag =0 and t_order.is_robot=0
+			<if test="orderNo !=null and orderNo !='' ">
+				and t_order.order_no like CONCAT(#{orderNo},"%")
+			</if>
+			<!--  根据用户名字查询 -->
+			<if test="userName!=null and userName !=''">
+				and t_order.purchase_name like CONCAT(#{userName},"%")
+			</if>
+			<!-- 过滤机器人订单 -->
+			<if test="userMobile!=null  and userMobile!=''">
+				and t_order.is_robot = 0 and t_order.purchase_code=#{customerCode}
+				and t_order.user_del_flag = 0
+			</if>
+			<!-- 根据订单状态查询 -->
+			<if test="status !=null">
+				and t_order.order_status = #{status}
+			</if>
+			<!--开始时间和结束时间都不为空-->
+			<if test="createStartTime !=null and createStartTime!='' and createEndTime !=null and createEndTime !=''">
+				and t_order.create_time BETWEEN #{createStartTime} AND #{createEndTime}
+			</if>
+			<!--只有开始时间-->
+			<if test="createStartTime !=null and createStartTime!='' and (createEndTime ==null || createEndTime =='')">
+				<![CDATA[and t_order.create_time > #{createStartTime}]]>
+			</if>
+			<!--只有结束时间-->
+			<if test="(createEndTime ==null and createEndTime =='') and createEndTime !=null and createEndTime !=''">
+				<![CDATA[  and t_order.create_time < #{createEndTime}]]>
+			</if>
+			<!-- 不查询删除状态的订单 -->
+		</where>
+	</select>
+
+	<update id="updateOrderStatusByOverTime">
+		update trade_order set order_status = #{_status}
+        WHERE NOW() >=  DATE_ADD(create_time,INTERVAL #{minute} minute) and order_status = #{status}
+	</update>
+
+
+	<!-- 修改指定用户超时订单的状态 -->
+	<update id="updateUserOrderStatusByOverTime">
+		update trade_order
+        set order_status = #{_status}
+        WHERE
+            order_status = #{status}
+          and purchase_code = #{purchaseCode}
+	</update>
+	
+	<select id="countTradeOrderByUserCode" resultType="int">
+		select IF(count(a.id) is null,0,count(a.id)) from order_goods a
+		left join trade_order t_order on t_order.order_no=a.order_no
+		where t_order.del_flag =0 and t_order.user_del_flag = 0 and order_status !=-4 and t_order.purchase_code=#{userCode}
+	</select>
+</mapper>

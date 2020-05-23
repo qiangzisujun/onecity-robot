@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.PaymentCodeMapper">
+
+    <select id="callPaymentCode" resultType="com.tangchao.shop.pojo.PaymentCode">
+        select * from cms_payment_code
+        <where>
+            1 = 1 and `price` = #{price} and `type` = #{type}
+            and is_open = '1' and flag = '0' order by RAND() desc
+            limit 1
+        </where>
+    </select>
+
+    <update id="updatePaymentCodeByPrimaryKeySelective" parameterType="com.tangchao.shop.pojo.PaymentCode">
+        update cms_payment_code
+        <set>
+            <if test="image != null and image != ''">
+                image = #{image,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="lastCallTime != null">
+                last_call_time = #{lastCallTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="type != null and type != ''">
+                `type` = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="isOpen != null and isOpen != ''">
+                is_open = #{isOpen,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id} and flag = 0
+    </update>
+
+    <select id="getPaymentCodeList" resultType="string">
+        select price from cms_payment_code
+        where is_open=1 and flag=0
+        GROUP BY price
+    </select>
+</mapper>

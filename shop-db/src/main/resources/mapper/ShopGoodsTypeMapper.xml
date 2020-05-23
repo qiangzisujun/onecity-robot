@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.ShopGoodsTypeMapper">
+
+    <resultMap id="IdResultMap" type="java.lang.Long">
+        <id column="id" property="id" />
+    </resultMap>
+
+    <select id="selectMaxSortByPid" resultType="java.lang.Integer">
+    	select max(type_sort) from shop_goods_type where flag &lt;> -1 and type_pid = #{pid}
+    </select>
+
+    <select id="selectPidById" resultType="java.lang.Long">
+        select type_pid from shop_goods_type where id = #{id}
+    </select>
+
+    <select id="selectSubIdById" resultMap="IdResultMap">
+    	select id from shop_goods_type where type_pid = #{id}
+    </select>
+
+    <select id="selectSortById" resultType="java.lang.Integer">
+    	select type_sort from shop_goods_type where id = #{id}
+    </select>
+
+    <select id="selectSubIdsByIds" resultMap="IdResultMap">
+    	select id from shop_goods_type where flag &lt;> -1 and type_pid in (${ids})
+    </select>
+
+</mapper>

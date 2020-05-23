@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.GoodsRobotSetMapper">
+
+    <resultMap id="BaseResultMap" type="java.util.Map">
+        <id column="id" property="id" />
+        <result column="goods_id" property="goodsId" />
+        <result column="goods_no" property="goodsNo" />
+        <result column="goods_name" property="goodsName" />
+        <result column="periods_number" property="periodsNumber" />
+        <result column="buying_periods_number" property="buyingPeriodsNumber" />
+        <result column="percentage" property="percentage" />
+        <result column="max_purchases_count" property="maxPurchasesCount" />
+        <result column="min_purchases_count" property="minPurchasesCount" />
+        <result column="max_purchases_minute" property="maxPurchasesMinute" />
+        <result column="min_purchases_minute" property="minPurchasesMinute" />
+        <result column="protocol_lottery_no" property="protocolLotteryNo" />
+        <result column="status" property="status" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="max_count" property="maxCount" />
+        <result column="bought_count" property="boughtCount" />
+        <result column="goods_price" property="goodsPrice" />
+        <result column="jack_pot" property="jackPot" />
+    </resultMap>
+
+
+    <resultMap id="BaseResultMapSET" type="com.tangchao.shop.pojo.GoodsRobot">
+        <id column="id" property="id" />
+        <result column="set_id" property="setId" />
+        <result column="goods_id" property="goodsId" />
+        <result column="goods_period_id" property="goodsPeriodId" />
+        <result column="buy_rate_minute" property="buyRateMinute" />
+        <result column="goods_limit_count" property="goodsLimitCount" />
+        <result column="max_count" property="maxCount" />
+        <result column="bought_count" property="boughtCount" />
+        <result column="max_purchases_conut" property="maxPurchasesConut" />
+        <result column="min_purchases_conut" property="minPurchasesConut" />
+        <result column="max_purchases_minute" property="maxPurchasesMinute" />
+        <result column="min_purchases_minute" property="minPurchasesMinute" />
+        <result column="jack_pot_now" property="jackPotNow" />
+        <result column="jack_pot_all" property="jackPotAll" />
+        <result column="jack_pot_type" property="jackPotType" />
+        <result column="timestamp" property="timestamp" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,set_id,goods_id,goods_period_id,buy_rate_minute,goods_limit_count,max_count,bought_count,max_purchases_conut,min_purchases_conut,max_purchases_minute,min_purchases_minute,jack_pot_now,jack_pot_all,jack_pot_type,timestamp
+    </sql>
+    <!-- 根据条件查询机器人任务集合 -->
+    <select id="selectList" resultMap="BaseResultMapSET">
+       <![CDATA[ select a.* from goods_robot a
+        left join goods_info b on a.goods_id=b.id
+        where b.is_sell=1 and b.flag=0 and a.bought_count < a.max_count and a.timestamp=#{timestamp}]]>
+    </select>
+
+    <select id="selectRobotAndSetList" resultMap="BaseResultMap">
+        SELECT rs.*,r.max_count,r.bought_count,gi.goods_price FROM goods_robot_set rs LEFT JOIN goods_robot r ON rs.id=r.set_id LEFT JOIN goods_info gi ON rs.goods_id=gi.id
+        <where>
+            1=1
+            <if test="goodsName!=null and goodsName != ''">
+                AND rs.goods_name LIKE CONCAT("%",#{goodsName},"%")
+            </if>
+            <if test="goodsNo!=null and goodsNo != ''">
+                AND rs.goods_no LIKE CONCAT("%",#{goodsNo},"%")
+            </if>
+            <if test="typeId!=null and typeId != ''">
+                AND gi.type_id =#{typeId}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateRobotMaxCountBySetId">
+        UPDATE goods_robot r SET r.`max_count` = r.`bought_count` WHERE r.`set_id` = #{setId};
+    </update>
+
+    <select id="getGoodsSetList" resultType="java.util.Map">
+        SELECT
+            rs.*,
+            r.max_count,
+            r.bought_count,
+            gi.goods_price
+        FROM
+            goods_robot_set rs
+            LEFT JOIN goods_robot r ON rs.id = r.set_id
+            LEFT JOIN goods_info gi ON rs.goods_id = gi.id
+    </select>
+</mapper>

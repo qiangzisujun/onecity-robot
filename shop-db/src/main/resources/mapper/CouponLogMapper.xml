@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangchao.shop.mapper.CouponLogMapper">
+
+<!--    <select id="selectOne"  parameterType="cn.lyn4ever.entity.User"  parameterType="cn.lyn4ever.entity.User"   resultType="java.util.HashMap">-->
+<!--        select id,username,telphone from user where telphone=#{telphone} and password = #{password}-->
+<!--    </select>-->
+
+
+    <select id="findAll" resultType="com.tangchao.shop.dto.CouponLogDTO">
+        SELECT
+            b.user_mobile userMobile,
+            a.pay_amount payAmount,
+            a.log_status logStatus,
+            a.create_time createTime,
+            a.`no`,
+            a.number,
+            c.coupon_name couponName,
+            c.coupon_status couponStatus,
+            c.coupon_code couponCode,
+            c.coupon_amount couponAmount,
+            c.efective_time efectiveTime
+        FROM
+            coupon_log a
+            LEFT JOIN customer b ON a.user_code = b.user_code
+            LEFT JOIN user_coupon c ON a.`no` = c.coupon_log_no
+        WHERE
+            a.datalevel = 1
+        <if test="logStatus !=null">
+            AND a.log_status = #{logStatus}
+        </if>
+        <if test="couponStatus !=null">
+            AND c.coupon_status = #{couponStatus}
+        </if>
+        <if test="userMobile !=null and userMobile != ''">
+            AND b.user_mobile like CONCAT("%",#{userMobile},"%")
+        </if>
+        <if test="beforeDate !=null and beforeDate != ''">
+            AND unix_timestamp(a.create_time) <![CDATA[ >= ]]> #{beforeDate, jdbcType=TIMESTAMP}
+        </if>
+        <if test="rearDate !=null and rearDate != ''">
+            AND unix_timestamp(a.create_time) <![CDATA[ <= ]]> #{rearDate, jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="findAllTotalAmount" resultType="java.math.BigDecimal">
+        SELECT
+            SUM(a.pay_amount) AS totalAmount
+        FROM
+        coupon_log a
+        LEFT JOIN customer b ON a.user_code = b.user_code
+        LEFT JOIN user_coupon c ON a.`no` = c.coupon_log_no
+        WHERE
+        a.datalevel = 1
+        <if test="logStatus !=null">
+            AND a.log_status = #{logStatus}
+        </if>
+        <if test="couponStatus !=null">
+            AND c.coupon_status = #{couponStatus}
+        </if>
+        <if test="userMobile !=null and userMobile != ''">
+            AND b.user_mobile like CONCAT("%",#{userMobile},"%")
+        </if>
+        <if test="beforeDate !=null and beforeDate != ''">
+            AND unix_timestamp(a.create_time) <![CDATA[ >= ]]> #{beforeDate, jdbcType=TIMESTAMP}
+        </if>
+        <if test="rearDate !=null and rearDate != ''">
+            AND unix_timestamp(a.create_time) <![CDATA[ <= ]]> #{rearDate, jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+
+</mapper>

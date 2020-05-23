@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.WinningOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.WinningOrder">
+        <id column="id" property="id" />
+        <result column="order_no" property="orderNo" />
+        <result column="order_status" property="orderStatus" />
+        <result column="goods_no" property="goodsNo" />
+        <result column="stage_id" property="stageId" />
+        <result column="goods_stage" property="goodsStage" />
+        <result column="customer_code" property="customerCode" />
+        <result column="customer_name" property="customerName" />
+        <result column="goods_price" property="goodsPrice" />
+        <result column="goods_name" property="goodsName" />
+        <result column="goods_img" property="goodsImg" />
+        <result column="goods_firm" property="goodsFirm" />
+        <result column="goods_spec" property="goodsSpec" />
+        <result column="open_prize_result" property="openPrizeResult" />
+        <result column="open_prize_time" property="openPrizeTime" />
+        <result column="zip_code" property="zipCode" />
+        <result column="user_name" property="userName" />
+        <result column="user_address" property="userAddress" />
+        <result column="user_mobile" property="userMobile" />
+        <result column="express_no" property="expressNo" />
+        <result column="is_robot" property="isRobot" />
+        <result column="express_company" property="expressCompany" />
+        <result column="order_remarks" property="orderRemarks" />
+        <result column="delivery_id" property="deliveryId" />
+        <result column="delivery_time" property="deliveryTime" />
+        <result column="take_goods_time" property="takeGoodsTime" />
+        <result column="express_cost" property="expressCost" />
+        <result column="buy_num" property="buyNum" />
+        <result column="is_allow_sunburn" property="isAllowSunburn" />
+        <result column="is_show_order" property="isShowOrder" />
+        <result column="isCustCode" property="isCustCode" />
+        <result column="black_statu" property="blackStatus" />
+        <result column="customerPhone" property="customerPhone" />
+    </resultMap>
+
+    <!-- 根据条件查询订单列表 -->
+    <select id="selectWinningOrderList" resultMap="BaseResultMap">
+        select
+        w.id,w.order_no,w.order_status,w.goods_no,w.stage_id,w.goods_stage,w.customer_code,w.customer_name,
+        w.goods_price,w.goods_name,w.goods_img,w.goods_firm,w.goods_spec,w.open_prize_result,w.open_prize_time,
+        w.zip_code,w.user_name,w.user_address,w.user_mobile,w.express_no,w.is_robot,w.express_company,
+        w.order_remarks,w.delivery_id,w.delivery_time,w.take_goods_time,w.express_cost,w.buy_num,
+        w.is_allow_sunburn,w.is_show_order
+        ,(select MAX(w.buy_num * gi.buy_price)  from lottery l, goods_info gi where l.goods_no = gi.goods_no AND l.stage_id = w.stage_id AND l.customer_code = w.customer_code
+        GROUP BY
+        stage_id) AS priceTotal,IF(g.cust_code is null,0,1) as isCustCode,
+        g.recovery_price as recoveryPrice,cu.black_statu,cu.user_mobile as customerPhone
+        from winning_order w
+        left join goods_stage  g on w.stage_id = g.id
+        left join customer cu on cu.user_code=w.customer_code
+        <where>
+            w.is_robot=0
+            <!-- 根据商品编号查询 -->
+            <if test="goodsNo !=null and goodsNo != ''">
+                 and w.goods_no like CONCAT("%",#{goodsNo},"%")
+            </if>
+            <!-- 订单编码 -->
+            <if test="orderNo !=null and orderNo != ''">
+                and w.order_no like CONCAT("%",#{orderNo},"%")
+            </if>
+            <!-- 根据用户名字查询 -->
+            <if test="userName !=null and userName != ''">
+                and w.customer_name like CONCAT("%",#{userName},"%")
+            </if>
+            <!-- 根据订单状态查询 -->
+            <if test="status !=null">
+                <choose>
+                    <when test="status==1">
+                        and w.order_status = 1 or w.order_status =8
+                    </when>
+                    <otherwise>
+                        and w.order_status = #{status}
+                    </otherwise>
+                </choose>
+            </if>
+            <!--根据用户手机号查询 -->
+            <if test="customerCode != null and customerCode !=''">
+                and w.customer_code  = #{customerCode} and w.is_robot = 0
+            </if>
+            <if test="createStartTime != null and createStartTime != ''">
+                <![CDATA[ AND w.open_prize_time >= #{createStartTime}]]>
+            </if>
+            <if test="createEndTime != null and createEndTime != ''">
+                <![CDATA[ AND w.open_prize_time  <= #{createEndTime} ]]>
+            </if>
+        </where>
+        order by open_prize_time desc
+    </select>
+
+    <select id="countWinningOrderList" resultType="int">
+        select IF(count(1) is null,0,count(1))
+        from winning_order w
+        left join goods_stage  g on w.stage_id = g.id
+        <where>
+            1=1 and w.is_robot=0
+            <!-- 根据商品编号查询 -->
+            <if test="goodsNo !=null and goodsNo != ''">
+                and w.goods_no like CONCAT("%",#{goodsNo},"%")
+            </if>
+            <!-- 订单编码 -->
+            <if test="orderNo !=null and orderNo != ''">
+                and w.order_no like CONCAT("%",#{orderNo},"%")
+            </if>
+            <!-- 根据用户名字查询 -->
+            <if test="userName !=null and userName != ''">
+                and w.customer_name like CONCAT("%",#{userName},"%")
+            </if>
+            <!-- 根据订单状态查询 -->
+            <if test="status !=null">
+                <choose>
+                    <when test="status==1">
+                        and w.order_status = 1 or w.order_status =8
+                    </when>
+                    <otherwise>
+                        and w.order_status = #{status}
+                    </otherwise>
+                </choose>
+            </if>
+            <!--根据用户手机号查询 -->
+            <if test="customerCode != null and customerCode !=''">
+                and w.customer_code  = #{customerCode} and w.is_robot = 0
+            </if>
+            <if test="customerCode != null and customerCode !=''">
+                and w.customer_code  = #{customerCode} and w.is_robot = 0
+            </if>
+            <if test="createStartTime != null and createStartTime != ''">
+                <![CDATA[ AND w.open_prize_time >= #{createStartTime}]]>
+            </if>
+            <if test="createEndTime != null and createEndTime != ''">
+                <![CDATA[ AND w.open_prize_time  <= #{createEndTime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="getWinningPriceTotal" resultType="java.util.HashMap">
+        select  SUM(g.goods_price) AS goodsPriceTotal,
+		SUM(g.recovery_price) AS recoveryPriceTotal
+		from winning_order w
+		left join goods_stage  g on w.stage_id = g.id
+        <where>
+             1=1 and w.is_robot=0
+            <!-- 根据商品编号查询 -->
+            <if test="goodsNo !=null and goodsNo != ''">
+                w.goods_no like CONCAT("%",#{goodsNo},"%")
+            </if>
+            <!-- 订单编码 -->
+            <if test="orderNo !=null and orderNo != ''">
+                and w.order_no like CONCAT("%",#{orderNo},"%")
+            </if>
+            <!-- 根据用户名字查询 -->
+            <if test="userName !=null and userName != ''">
+                and w.customer_name like CONCAT("%",#{userName},"%")
+            </if>
+            <!-- 根据订单状态查询 -->
+            <if test="status !=null">
+                <choose>
+                    <when test="status==1">
+                        and w.order_status = 1 or w.order_status =8
+                    </when>
+                    <otherwise>
+                        and w.order_status = #{status}
+                    </otherwise>
+                </choose>
+            </if>
+            <!--根据用户手机号查询 -->
+            <if test="customerCode != null and customerCode !=''">
+                and w.customer_code  = #{customerCode} and w.is_robot = 0
+            </if>
+            <if test="createStartTime != null and createStartTime != ''">
+                <![CDATA[ AND w.open_prize_time >= #{createStartTime}]]>
+            </if>
+            <if test="createEndTime != null and createEndTime != ''">
+                <![CDATA[ AND w.open_prize_time  <= #{createEndTime} ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="sumWinningPriceTotalByUserCode" resultType="java.util.HashMap">
+        select COALESCE(SUM(goods_price),0) as winningTotal,customer_code as customerCode from winning_order
+        where customer_code in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY customer_code
+    </select>
+
+    <select id="getWinningOrderByOrderNo" resultMap="BaseResultMap">
+        select * from winning_order where order_no=#{orderNo}
+    </select>
+
+
+    <select id="selectProxyOrderList" resultType="java.util.HashMap">
+        select
+        f.`id` id,
+        f.`status_flag` statusFlag,
+        w.`order_no` orderNo,
+        f.`create_time` createTime,
+        s.`goods_name` goodsName,
+        c.`user_name` userName,
+        s.`stage_index` stageIndex,
+        s.`recovery_price` recoveryPrice,
+        f.check_code as checkCode
+        from fast_order f
+        left join winning_order w  on w.`id` = f.`win_order_id`
+        left join goods_stage s on s.`id` = f.`stage_id`
+        left join customer c on c.`flag` = 0 and c.`user_code` = f.`user_code`
+        where 1 = 1
+        <if test="startDate != null and startDate!=''">
+            <![CDATA[ and f.`create_time` >= #{startDate}]]>
+        </if>
+        <if test="endDate != null and endDate !=''">
+              <![CDATA[ and f.`create_time` <= #{endDate}]]>
+        </if>
+        <if test="orderType != null and orderType !=''">
+              <![CDATA[and f.`status_flag` = #{orderType}]]>
+        </if>
+        <if test="userMobile != null and userMobile != ''">
+             <![CDATA[ and c.`user_mobile` = #{userMobile} ]]>
+        </if>
+        and f.`puser_code` = #{userCode}
+        order by f.`create_time` desc
+    </select>
+
+    <select id="selectProxyOrderCount" resultType="java.lang.Double">
+        select
+        if( sum(s.`recovery_price`) is null,0.00, sum(s.`recovery_price`))
+        from
+        fast_order f
+        left join winning_order w on w.`id` = f.`win_order_id`
+        left join goods_stage s on s.`id` = f.`stage_id`
+        left join customer c on c.`flag` = 0 and c.`user_code` = f.`user_code`
+        where 1 = 1
+        <if test="startDate != null and startDate!=''">
+            <![CDATA[ and f.`create_time` >= #{startDate}]]>
+        </if>
+        <if test="endDate != null and endDate !=''">
+            <![CDATA[ and f.`create_time` <= #{endDate}]]>
+        </if>
+        <if test="orderType !=null and orderType !=''">
+            <![CDATA[and f.`status_flag` = #{orderType}]]>
+        </if>
+        <if test="userMobile != null and userMobile != ''">
+            <![CDATA[ and c.`user_mobile` = #{userMobile} ]]>
+        </if>
+        and f.`puser_code` = #{userCode}
+    </select>
+
+    <select id="countWinningOrderByUserCode" resultType="int">
+        select IF(count(id) is null,0,count(id)) from winning_order where customer_code=#{userCode}
+    </select>
+
+
+    <!-- 根据条件查询订单列表 导出中奖订单 -->
+    <select id="findWinningOrderByPojo" resultType="java.util.HashMap">
+        select
+        order_no,
+        goods_name,
+        goods_price,
+        open_prize_time,
+        open_prize_result,
+        customer_name,
+        customer_code,
+        user_address,
+        user_mobile,
+        user_name
+        from winning_order
+        <where>
+            1=1 and is_robot = 0
+            <!-- 根据商品编号查询 -->
+            <if test="null != goodsNo and goodsNo != ''">
+                and goods_no like CONCAT("%",#{goodsNo},"%")
+            </if>
+            <!-- 订单编码 -->
+            <if test="null != orderNo and orderNo != ''">
+                and order_no like CONCAT(#{orderNo},"%")
+            </if>
+            <!-- 根据用户名字查询 -->
+            <if test="null != userName and userName != ''">
+                and customer_name like CONCAT("%",#{userName},"%")
+            </if>
+            <if test="null != customerCode and customerCode!=''">
+                and customer_code = #{customerCode}
+            </if>
+            <!-- 根据订单状态查询 -->
+            <if test="status !=null">
+                <choose>
+                    <when test="status==1">
+                        and order_status = 1 or order_status =8
+                    </when>
+                    <otherwise>
+                        and order_status = #{status}
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="createStartTime != null and createStartTime != '' and createEndTime != null and createEndTime != ''">
+                AND open_prize_time BETWEEN DATE_FORMAT(#{createStartTime}, '%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(#{createEndTime}, '%Y-%m-%d %H:%i:%s')
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectWinningOrderByGoodsNo" resultType="java.util.HashMap">
+        SELECT
+            c.user_portrait,
+            wo.*
+        FROM
+            winning_order wo
+            LEFT JOIN customer c ON wo.customer_code = c.user_code
+        WHERE
+            goods_no = #{goodsNo}
+        ORDER BY wo.goods_stage desc
+    </select>
+
+    <select id="countWinningOrderByGoodsNo" resultType="int">
+        SELECT
+            IF(count(1) is null,0,count(1))
+        FROM
+            winning_order
+        WHERE
+            goods_no = #{goodsNo}
+    </select>
+</mapper>

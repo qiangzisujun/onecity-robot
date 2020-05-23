@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.GoodsMapper">
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.Goods">
+        <id column="id" property="id" />
+        <result column="flag" property="flag" />
+        <result column="create_id" property="createId" />
+        <result column="create_time" property="createTime" />
+        <result column="last_modify_id" property="lastModifyId" />
+        <result column="last_modify_time" property="lastModifyTime" />
+        <result column="type_id" property="typeId" />
+        <result column="goods_no" property="goodsNo" />
+        <result column="goods_name" property="goodsName" />
+        <result column="goods_brand" property="goodsBrand" />
+        <result column="goods_spec" property="goodsSpec" />
+        <result column="goods_inv" property="goodsInv" />
+        <result column="goods_price" property="goodsPrice" />
+        <result column="goods_picture" property="goodsPicture" />
+        <result column="goods_info_picture" property="goodsInfoPicture" />
+        <result column="goods_code" property="goodsCode" />
+        <result column="is_show_order" property="isShowOrder" />
+        <result column="recovery_price" property="recoveryPrice" />
+        <result column="buy_num" property="buyNum" />
+        <result column="buy_price" property="buyPrice" />
+        <result column="sell_stage" property="sellStage" />
+        <result column="is_sell" property="isSell" />
+        <result column="sell_start_time" property="sellStartTime" />
+        <result column="sell_end_time" property="sellEndTime" />
+        <result column="is_rcmd" property="isRcmd" />
+        <result column="is_new" property="isNew" />
+        <result column="is_activity" property="isActivity" />
+        <result column="activity_buy_num" property="activityBuyNum" />
+        <result column="goodsHot" property="goodsHot"/>
+    </resultMap>
+
+    <select id="goodsList" resultType="com.tangchao.shop.pojo.Goods">
+        select id Id,goods_no goodsNo,goods_name goodsName,goods_brand goodsBrand,goods_spec goodsSpec,goods_inv goodsInv,
+        goods_price goodsPrice,goods_picture goodsPicture,is_sell isSell,type_id typeId,goods_info_picture as goodsInfoPicture,
+        recovery_price as recoveryPrice,buy_num as buyNum,buy_price as buyPrice, is_show_order as isShowOrder,is_rcmd as isRcmd,is_new as isNew,activity_buy_num as activityBuyNum,
+        is_activity as isActivity,sell_start_time as sellStartTime,sell_stage as sellStage,flag from goods_info
+        <where>
+            <if test="goodsName !=null and goodsName != ''">
+                and goods_name like '%${goodsName}%'
+            </if>
+            <if test="typeId !=null ">
+                and type_id=#{typeId}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectSellGoodsList" resultMap="BaseResultMap">
+        select i.*,r.id  Id,IF(r.goods_hot is null,0,r.goods_hot) goodsHot
+        from goods_info i
+        left join goods_rcmd r
+        on r.flag = 0 and r.goods_id = i.id
+        where 1=1 and i.flag = 0
+        <if test="goodsName != null and goodsName!=''">
+            and i.goods_name like CONCAT(#{goodsName},"%")
+        </if>
+        <if test="typeId != null">
+            and i.type_id = #{typeId}
+        </if>
+    </select>
+
+    <update id="updateSellgoods" >
+        update goods_info i
+        left join goods_rcmd r
+        on r.goods_id = i.id
+        <set>
+            <if test="isNew !=null">
+                i.is_new=#{isNew},
+            </if>
+            <if test="goodsHot !=null">
+                r.goods_hot=#{goodsHot},
+            </if>
+            <if test="isRcmd !=null">
+                i.is_rcmd=#{isRcmd}
+            </if>
+        </set>
+        where i.id=#{id}
+    </update>
+
+
+    <!-- 查询商品数据 -->
+    <select id="selectByMap" resultType="java.util.HashMap">
+        select
+            `goods_name`,
+             type_id,
+             `goods_no`,
+             goods_inv,
+             CONCAT(`goods_price`,'元') goods_price,
+             CONCAT(`recovery_price`,'元') as recovery_price,
+             if(`is_show_order` = 1 ,'可晒单','不可晒单') as is_show_order,
+             if(`is_sell` = 1 ,'是','否') as is_sell,
+             buy_num,
+             buy_price
+        from goods_info where flag = 0
+    </select>
+</mapper>

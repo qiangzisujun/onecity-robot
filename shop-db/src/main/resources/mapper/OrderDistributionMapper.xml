@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.OrderDistributionMapper">
+    <select id="CommissionList" parameterType="long" resultType="com.tangchao.shop.pojo.OrderDistribution">
+        SELECT
+       		 o.id AS id, o.remind_money AS remindMoney, o.create_time AS
+       		 createTime,c.user_name AS userName,o.order_total as orderTotal
+        FROM order_distribution o
+        	LEFT JOIN customer c
+			ON o.purchaser_code=c.user_code
+			WHERE 1=1
+			AND o.beneficiary_code = #{userCode}
+			AND  DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(o.create_time)
+            order by o.create_time desc
+    </select>
+
+	<select id="getCommissionListByUserCode" resultType="java.util.Map">
+		<![CDATA[ SELECT
+		o.id AS id, o.remind_money AS remindMoney, o.create_time AS
+		createTime,c.user_name AS userName,o.order_total as orderTotal,o.remind_spec as remindSpec,
+		c.user_mobile, if(o.order_no is null,2,(o.order_no REGEXP '[^0-9.]')) as isOrder,o.order_no as orderNo
+		FROM order_distribution o
+		LEFT JOIN customer c
+		ON o.purchaser_code=c.user_code
+		WHERE 1=1
+		AND o.beneficiary_code = #{userCode}
+		AND  DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(o.create_time)
+		order by o.create_time desc]]>
+	</select>
+	
+	<select id="sumCommissionListByUserCode" resultType="java.util.Map">
+		select sum(a.remind_money) as totalMoney,c.employ_money as balance
+		from order_distribution a
+		left join customer b on a.beneficiary_code=b.user_code
+		left join customer_info c on c.customer_code=b.user_code
+		where a.beneficiary_code=#{userCode}
+	</select>
+
+	<select id="sumWithdrawnByUserCode" resultType="java.lang.Double">
+		select sum(a.withdraw_price) from customer_employ_tixian_record a
+		left join customer b on a.customer_code=b.user_code
+		where a.customer_code=#{userCode} and a.state=3
+	</select>
+
+</mapper>

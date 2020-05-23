@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.LotteryMapper">
+
+    <!--获奖结果信息-->
+    <select id="selectWinLotteryByStageId" resultType="com.tangchao.shop.vo.GoodsLotteryVO">
+        select s.`id` stageId,s.`is_award` isAward,s.`full_time` fullTime,s.`goods_no` goodsNo,
+        l.`create_time` buyTime,l.`open_winning_time` openTime,l.`lottery_code` lotteryCode,
+        l.`result_code` resultCode,c.`user_name` userName,c.`user_code` userCode,c.`user_portrait` userIcon,
+        (select SUM(length(lottery_code) / 8) from lottery ll where ll.customer_code = c.user_code and ll.goods_no =
+        l.goods_no AND ll.goods_stage = l.goods_stage ) count,
+        (select stage_index from goods_stage b where b.id =s.id order by id desc limit 1) as maxStageIndex
+        from goods_stage s
+        left join lottery l on l.`is_winning` = 2 and l.`stage_id` = s.`id`
+        left join customer c on c.`flag` = 0 and l.`result_user_code` = c.`user_code`
+        where s.`id` =#{stageId} and s.`flag` = 0
+    </select>
+
+    <!-- 查询上期商品开奖信息 -->
+    <select id="selectPrevWinLottery" resultType="com.tangchao.shop.vo.GoodsLotteryVO">
+        select c.`user_name` userName,c.`user_portrait` userIcon,c.`user_code` userCode,
+        l.`lottery_code` lotteryCode,l.`result_code` resultCode,l.`create_time` buyTime,
+        l.`open_winning_time` openTime,
+        (select SUM(length(lottery_code) / 8) from lottery ll where ll.customer_code = c.user_code and ll.goods_no =
+        l.goods_no AND ll.goods_stage = l.goods_stage ) count
+        from lottery l
+        left join customer c on c.`flag` = 0 and c.`user_code` = l.`customer_code`
+        where l.`goods_no` = #{goodsNo}
+        and l.`goods_stage` = #{prevIndex}
+        and l.`is_winning` = 2
+    </select>
+
+
+    <select id="selectGoodsLotteryList" resultType="com.tangchao.shop.vo.GoodsLotteryVO">
+          select
+        l.`lottery_code` lotteryCode,
+        l.`create_time` createTime,
+        c.`user_name` userName,c.`user_code` userCode,
+        c.`user_portrait` userIcon
+        from lottery l
+        inner join customer c on c.`flag` = 0 and c.`user_code` = l.`customer_code`
+        where l.`stage_id` = #{stageId}
+        <if test="createTime != null">
+            <![CDATA[and l.`create_time` &lt; #{createTime}]]>
+        </if>
+    </select>
+
+    <!--<select id="selectTrendInfoByGoodsNo" resultType="com.tangchao.shop.vo.TrendChartVO">
+    	select
+    	  s.`goods_picture` goodsPicture,
+		  s.`goods_brand` goodsBrand,
+		  s.`goods_name` goodsName,
+		  s.`goods_spec` goodsSpec,
+		  s.`stage_index` stageIndex,
+		  s.`buy_size` buySize,
+		  s.`buy_index` buyIndex,
+		  s.`id` stageId
+		from
+		  goods_stage s
+		where s.`goods_no` = #{goodsNo}
+		  and s.`is_award` != 1
+		  and s.`flag` = 0 limit 1
+    </select>-->
+
+    <select id="selectLotteryCodeByStageId" resultType="java.lang.String">
+        SELECT lottery_code FROM lottery WHERE stage_id = #{stageId}
+    </select>
+
+	<!--<select id="selectTrendChart" resultType="com.tangchao.shop.vo.TrendChartVO">
+        SELECT o.id lotteryId,o.is_winning isWinning,o.goods_stage goodStage,o.stage_id stageId,c.user_name userName FROM lottery o LEFT JOIN customer c ON c.`flag` = 0
+		    AND c.`user_code` = o.`result_user_code`  WHERE o.`goods_no` =#{goodsNo}  AND is_winning=2 order by o.goods_stage desc limit 15;
+	</select>-->
+
+    <select id="goodsTrendListInfo" resultType="com.tangchao.shop.pojo.Lottery">
+        SELECT o.goods_stage goodsStage,o.stage_id stageId,o.lottery_code lotteryCode,o.goods_no goodsNo,o.result_user_code resultUserCode,c.user_name userName,o.is_winning isWinning,o.result_code resultCode,o.id Id,
+        o.customer_code customerCode,c.user_code userCode
+        FROM lottery o LEFT JOIN customer c ON c.`flag` = 0
+		    AND c.`user_code` = o.`result_user_code`  WHERE o.`goods_no` =#{goodsNo}  AND is_winning=2 order by o.goods_stage desc limit 15;
+	</select>
+
+    <select id="selectSumCountByWinLottery" resultType="java.lang.Double">
+        <![CDATA[SELECT SUM(LENGTH(lottery_code)/8) lotterySum FROM lottery WHERE stage_id=#{stageId} AND id<#{id};]]>
+	</select>
+    <select id="selectCountByBuyUser" resultType="java.lang.Integer">
+        select COUNT(1) from customer c
+        left join lottery l on c.user_code = l.customer_code
+        where l.goods_no = #{goodsNo} and l.stage_id = #{stageId}
+        and c.flag = 0
+    </select>
+
+
+    <!-- 获取白名单用户 包括机器人 -->
+    <select id="selectOneUserByNotBlackList" resultType="com.tangchao.shop.pojo.Lottery">
+        SELECT l.id,l.order_goods_id as orderGoodsId,l.goods_no as goodsNo,l.stage_id as stageId,l.goods_stage as goodsStage,
+        l.lottery_code as lotteryCode,l.customer_code as customerCode,l.lottery_code as lotteryCode,l.create_time as createTime,
+        l.is_robot as isRobot,l.open_winning_time as openWinningTime,l.is_winning as isWinning,l.result_code as resultCode,
+        l.result_user_code as resultUserCode,l.pay_ip FROM lottery l
+        left join customer c on c.user_code = l.customer_code
+        where l.goods_no=#{goodsNo} and l.stage_id=#{stageId}
+        and c.flag = 0 and c.black_statu = 0
+    </select>
+
+    <!-- 获取白名单用户 不包括机器人 -->
+    <select id="selectOneUserByWhitelist" resultType="com.tangchao.shop.pojo.Lottery">
+        SELECT l.id,l.order_goods_id as orderGoodsId,l.goods_no as goodsNo,l.stage_id as stageId,l.goods_stage as goodsStage,
+        l.lottery_code as lotteryCode,l.customer_code as customerCode,l.lottery_code as lotteryCode,l.create_time as createTime,
+        l.is_robot as isRobot,l.open_winning_time as openWinningTime,l.is_winning as isWinning,l.result_code as resultCode,
+        l.result_user_code as resultUserCode,l.pay_ip FROM lottery l
+        left join customer c on c.user_code = l.customer_code
+        where l.is_robot =0 and l.goods_no=#{goodsNo} and l.stage_id=#{stageId}
+        and c.flag = 0 and c.black_statu = 0
+    </select>
+
+    <!-- 查询某个时间段的前100条数据 -->
+    <select id="selectLately100" resultType="com.tangchao.shop.pojo.Lottery">
+        <![CDATA[ SELECT (select c.user_name from customer c where l.customer_code = c.user_code ) userName,l.create_time as createTime FROM lottery l
+        WHERE l.create_time < #{lessThanTime} ORDER BY  l.create_time DESC LIMIT 100 ]]>
+    </select>
+
+    <select id="selectOpenGoods" resultType="java.util.HashMap">
+        select
+            c.`user_name` userName,c.user_portrait userIcon,c.user_code userCode,c.`is_robot` isRobot,
+            l.`lottery_code` lotteryCode,
+            l.`result_code` resultCode,
+            s.`id` id,
+            s.`goods_picture` goodsPicture,
+            s.`full_time` fullTime,
+            s.`goods_name` goodsName,
+            c.`user_mobile` userMobile
+        from goods_stage s
+        left join lottery l on l.`is_winning` = 2 and l.`stage_id` = s.`id`
+        left join customer c on c.`flag` = 0 and l.`result_user_code` = c.`user_code`
+        where s.`id` = #{stageId} and s.`flag` = 0
+    </select>
+    
+    
+    <select id="getLotteryListByOrderGoodIds" resultType="com.tangchao.shop.pojo.Lottery">
+        select * from lottery
+        where order_goods_id in
+        <foreach collection="orderIdList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectTrendInfoByGoodsNo" resultType="java.util.HashMap">
+        select
+          s.`goods_picture` goodsPicture,
+          s.`goods_brand` goodsBrand,
+          s.`goods_name` goodsName,
+          s.`goods_spec` goodsSpec,
+          s.`stage_index` stageIndex,
+          s.`buy_size` buySize,
+          s.`buy_index` buyIndex,
+          s.`id` stageId,
+          s.`goods_inv` goodsInv
+        from
+          goods_stage s
+        where s.`goods_no` = #{goodsNo}
+          and s.`is_award` != 1
+          and s.`flag` = 0 limit 1
+    </select>
+</mapper>

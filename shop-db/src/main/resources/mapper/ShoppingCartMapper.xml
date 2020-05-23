@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.ShoppingCartMapper">
+
+
+    <!-- 查询已购买过的商品次数 -->
+    <select id="selectPurchasedGoodsNum" resultType="java.lang.Long">
+        SELECT SUM(og.pay_num) FROM order_goods og
+        INNER JOIN trade_order o ON o.order_no = og.order_no
+        WHERE 1=1
+        AND o.purchase_code = #{userCode}
+        AND og.stage_id = #{goodsStageId}
+        AND (o.order_status = 0
+        OR o.order_status=-2)
+    </select>
+
+    <!--按购物车ID集合查询信息-->
+    <select id="getShoppingCartByIds" resultType="com.tangchao.shop.pojo.ShoppingCart" parameterType="map">
+        select id,customer_code as customerCode,goods_no as goodsNo,stage_id as stageId, is_check as isCheck, pay_num as payNum from shopping_cart
+        <where>
+            customer_code=#{customerCode}
+            and goods_no in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="countCartByUserCode" resultType="int">
+        select IF(count(id) is null,0,count(id)) from shopping_cart where customer_code=#{userCode}
+    </select>
+</mapper>

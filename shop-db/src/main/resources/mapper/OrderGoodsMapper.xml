@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tangchao.shop.mapper.OrderGoodsMapper">
+
+    <resultMap id="BaseResultMap" type="com.tangchao.shop.pojo.OrderGoods">
+        <id column="id" property="id" />
+        <result column="order_no" property="orderNo" />
+        <result column="goods_no" property="goodsNo" />
+        <result column="stage_id" property="stageId" />
+        <result column="goods_stage" property="goodsStage" />
+        <result column="goods_price" property="goodsPrice" />
+        <result column="goods_total" property="goodsTotal" />
+        <result column="goods_name" property="goodsName" />
+        <result column="goods_img" property="goodsImg" />
+        <result column="goods_firm" property="goodsFirm" />
+        <result column="goods_spec" property="goodsSpec" />
+        <result column="pay_price" property="payPrice" />
+        <result column="pay_num" property="payNum" />
+        <result column="is_allow_sunburn" property="isAllowSunburn" />
+        <result column="is_award" property="isAward" />
+        <result column="cust_code" property="custCode" />
+        <result column="m.user_name" property="lastModifyName" />
+    </resultMap>
+
+
+    <!-- 查询购买记录 -->
+    <select id="selectBuyRecordList" resultType="com.tangchao.shop.vo.UserByRecordVO">
+        select
+        (select user_name from customer where user_code = l.result_user_code) as winnersName,
+        gs.buy_size as buySize,gs.buy_index as buyIndex,gs.goods_inv as goodsInv,
+        l.lottery_code as lotteryCode,l.result_user_code as resultUserCode,
+        l.is_winning as isWinning,l.create_time as createTime,l.open_winning_time as openWinningTime,
+        og.goods_no as goodsNo,og.goods_img as goodsImg,og.goods_stage as goodsStage,og.goods_name as goodsName,og.id
+        FROM lottery l
+        INNER JOIN order_goods og on (og.id = l.order_goods_id)
+        INNER JOIN goods_stage gs on (gs.id = og.stage_id)
+        <where>
+            1=1 and l.customer_code = #{userCode}
+        </where>
+    </select>
+
+    <select id="selectUserObtainGoodsList" resultType="com.tangchao.shop.vo.UserByRecordVO">
+        select w.id,w.goods_no as goodsNo,w.goods_stage as goodsStage,w.customer_code as resultUserCode,w.customer_name
+        as winnersName,
+        w.goods_price as goodsPrice,w.goods_name as goodsName,w.goods_img as goodsImg,w.open_prize_time as
+        openWinningTime
+        from winning_order w
+        left join customer c on w.customer_code = c.user_code
+        left join goods_info g on w.goods_no = g.goods_no
+        where 1=1 and w.is_robot = 0 and w.customer_code =#{userCode}
+    </select>
+
+    <select id="selectOrderGoodsByOrderNo" resultMap="BaseResultMap">
+        SELECT goods.*,stage.is_award,stage.cust_code,m.user_name as 'm.user_name'
+        FROM order_goods goods
+        LEFT JOIN goods_stage stage ON goods.stage_id=stage.id
+        LEFT JOIN sys_manager m ON stage.last_modify_id = m.id
+        WHERE order_no in
+        <foreach collection="orderNoList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>
