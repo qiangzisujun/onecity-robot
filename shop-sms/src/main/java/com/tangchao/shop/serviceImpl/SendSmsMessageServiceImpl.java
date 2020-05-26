@@ -12,6 +12,7 @@ import com.tangchao.shop.mapper.SmsTemplateMapper;
 import com.tangchao.shop.mapper.SmsTypeMapper;
 import com.tangchao.shop.pojo.*;
 import com.tangchao.shop.service.SendSmsMessageService;
+import com.tangchao.shop.utils.SmsMessageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.DocumentException;
@@ -377,13 +378,19 @@ public class SendSmsMessageServiceImpl implements SendSmsMessageService {
     }
 
     private int sendSmsMessage(SmsInterface smsInterface,SmsTemplate template) throws IOException, NoSuchAlgorithmException, DocumentException {
+
+
+        boolean flag=SmsMessageUtil.sendMessage(template.getMobile(),template.getSmsContent(),smsInterface.getAccessKeyId(),smsInterface.getAccessKeySecret());
+        if (flag){
+            return 1;
+        }
         //  根据供应商发送短信
-        String supplierName = smsInterface.getSupplierName();
+        /*String supplierName = smsInterface.getSupplierName();
         if("etracker".equals(supplierName)) {
             return this.mlxySend(smsInterface,template);
         }else if("淘惠".equals(supplierName)){
             return this.taoHui(smsInterface,template);
-        }
+        }*/
         //  接口正在开发中
         return  0;
     }
