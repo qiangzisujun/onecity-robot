@@ -17,8 +17,4 @@ public class PasswordUtil {
         Object obj = new SimpleHash(hashAlgorithmName, password, credentialsSalt, hashIterations);
         return obj;
     }
-
-    public static void main(String[] args) {
-        System.out.println(contrastPassword("admin","onecity2020"));
-    }
 }

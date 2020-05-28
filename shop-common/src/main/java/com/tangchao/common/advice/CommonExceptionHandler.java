@@ -11,6 +11,6 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionResult> handleException(CustomerException e) {
-        return ResponseEntity.status(e.getExceptionEnum().getCode()).body(new ExceptionResult(e.getExceptionEnum()));
+        return ResponseEntity.status(200).body(new ExceptionResult(e.getExceptionEnum()));
     }
 }

@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public enum ExceptionEnum {
 
-    //特定状态码  501:用户已封禁,
-    INVALID_USERNAME_PASSWORD(4001, "error_4001"),////无效用户名或密码
+    INVALID_USERNAME_PASSWORD(4001,"error_4001"),////无效用户名或密码
     INVALID_USER_NOT_FOND(4002, "error_4002"),//用户不存在
     PASSWORD_NOT_ERROR(4003, "error_4003"),//密码不正确
     INVALID_USER_BANNED(4004, "error_4004"),//您的账户已被冻结,请联系客服工作人员
