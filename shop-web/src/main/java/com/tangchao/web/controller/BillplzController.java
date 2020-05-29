@@ -9,6 +9,7 @@ import com.tangchao.shop.mapper.CustomerMapper;
 import com.tangchao.shop.params.WebhookParam;
 import com.tangchao.shop.pojo.Customer;
 import com.tangchao.shop.pojo.UserInfo;
+import com.tangchao.shop.service.PayService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -56,6 +58,9 @@ public class BillplzController {
 
     @Autowired
     private CustomerMapper customerMapper;
+
+    @Autowired
+    private PayService payService;
 
     @RequestMapping(value = "/createBill",method = RequestMethod.GET)
     public ResponseEntity createBill(HttpServletRequest request, @RequestParam(value = "money") BigDecimal money) {
@@ -125,27 +130,8 @@ public class BillplzController {
 
     // TODO: 2019/12/13 S-caHZmB_KjGJRLsgJ4cHjCA
     @RequestMapping(value = "/webhook",method = RequestMethod.POST)
-    public void webhook(WebhookParam webhookParam) {
-        log.warn("________________________" + LocalDateTime.now().toString() + "________________________");
-        Boolean check = check(webhookParam);
-        if (check) {
-            log.error("数据一致");
-            log.error(webhookParam.toString());
-//
-//            CustomerPayInfo customerPayInfo = this.customerPayInfoService.selectByOrderNo(webhookParam.getId());
-//            if (customerPayInfo.getFlag().toString().equals("0")) {
-//                // this.customerPayInfoService.updateFlagById(customerPayInfo.getId());
-//                Long customerCode = customerPayInfo.getCustomerCode();
-//                this.customerInfoService.newRecharge(customerCode, customerPayInfo.getId(), customerPayInfo.getFee());
-//            } else {
-//                log.error("数据已经处理过！无需重复处理！");
-//            }
-
-        } else {
-            log.error("数据给修改过");
-        }
-        log.warn("________________________________________________________________________");
-        // return null;
+    public void webhook(WebhookParam webhookParam,HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        payService.webhook(webhookParam,request);
     }
 
 
@@ -153,9 +139,9 @@ public class BillplzController {
     public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl) {
         BigDecimal amount = money.multiply(new BigDecimal("100"));
         List<NameValuePair> urlParameters = new ArrayList<>();
-        //urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
-        urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
-        //urlParameters.add(new BasicNameValuePair("description", "Test callback"));
+        urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
+        //urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
+        urlParameters.add(new BasicNameValuePair("description", "Test callback"));
         urlParameters.add(new BasicNameValuePair("email", "853029827@qq.com"));
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
         urlParameters.add(new BasicNameValuePair("name", "Michael API V3"));

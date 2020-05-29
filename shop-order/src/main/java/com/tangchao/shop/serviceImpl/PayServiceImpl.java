@@ -155,7 +155,7 @@ public class PayServiceImpl implements PayService {
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
         // urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
-        urlParameters.add(new BasicNameValuePair("description", "Test callback"));
+        urlParameters.add(new BasicNameValuePair("description", "one city"));
         // urlParameters.add(new BasicNameValuePair("email", "853029827@qq.com"));
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
         urlParameters.add(new BasicNameValuePair("name", "Michael API V3"));

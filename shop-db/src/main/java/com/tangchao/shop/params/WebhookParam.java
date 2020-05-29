@@ -2,6 +2,7 @@ package com.tangchao.shop.params;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
  * @Class WebhookParam
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
  **/
 @Data
 @NoArgsConstructor
+@Component
 public class WebhookParam {
 
 
