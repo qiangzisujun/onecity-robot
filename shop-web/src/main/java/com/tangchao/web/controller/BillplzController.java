@@ -50,7 +50,6 @@ import java.util.List;
  * @Version 1.0
  **/
 @Slf4j
-@Controller
 @RequestMapping(value = "/api/pay/billplz")
 @RestController
 public class BillplzController {
@@ -59,7 +58,7 @@ public class BillplzController {
     private CustomerMapper customerMapper;
 
     @RequestMapping(value = "/createBill",method = RequestMethod.GET)
-    public ResponseEntity createBill(HttpServletRequest request, @RequestParam(value = "money") BigDecimal money, @RequestParam(value = "redirectUrl") String redirectUrl) {
+    public ResponseEntity createBill(HttpServletRequest request, @RequestParam(value = "money") BigDecimal money) {
 
         String contextPath = request.getServerName();
         String baseUrl = "http://" + contextPath.trim();
@@ -79,11 +78,11 @@ public class BillplzController {
         HttpClient httpclient = HttpClientBuilder.create().build();
 
         Base64.Encoder encoder = Base64.getEncoder();
-        String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
-        // String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
+        //String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
+        String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
 
-        HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
-        // HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
+        //HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
+        HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
         httppost.setHeader("Authorization", "Basic " + encoding);
         try {
             httppost.setEntity(new UrlEncodedFormEntity(getData(money, userInfo.getUserMobile(), baseUrl)));
@@ -120,15 +119,7 @@ public class BillplzController {
 
         String refid = jsonObject.getStr("id");
 
-        CustomerPayInfo payInfo = new CustomerPayInfo();
-        payInfo.setCreateTime(new Date());
-        payInfo.setPayType(0);
-        payInfo.setCustomerCode(customer.getUserCode());
-        payInfo.setTradeNo(refid);
-        payInfo.setFee(money.doubleValue());
-        this.customerPayInfoService.createPayInfo(payInfo);
-
-        return new ResultBean<>(ResultEnum.SUCCESS, url);
+        return ResponseEntity.ok(url);
 
     }
 
@@ -140,15 +131,15 @@ public class BillplzController {
         if (check) {
             log.error("数据一致");
             log.error(webhookParam.toString());
-
-            CustomerPayInfo customerPayInfo = this.customerPayInfoService.selectByOrderNo(webhookParam.getId());
-            if (customerPayInfo.getFlag().toString().equals("0")) {
-                // this.customerPayInfoService.updateFlagById(customerPayInfo.getId());
-                Long customerCode = customerPayInfo.getCustomerCode();
-                this.customerInfoService.newRecharge(customerCode, customerPayInfo.getId(), customerPayInfo.getFee());
-            } else {
-                log.error("数据已经处理过！无需重复处理！");
-            }
+//
+//            CustomerPayInfo customerPayInfo = this.customerPayInfoService.selectByOrderNo(webhookParam.getId());
+//            if (customerPayInfo.getFlag().toString().equals("0")) {
+//                // this.customerPayInfoService.updateFlagById(customerPayInfo.getId());
+//                Long customerCode = customerPayInfo.getCustomerCode();
+//                this.customerInfoService.newRecharge(customerCode, customerPayInfo.getId(), customerPayInfo.getFee());
+//            } else {
+//                log.error("数据已经处理过！无需重复处理！");
+//            }
 
         } else {
             log.error("数据给修改过");
@@ -162,10 +153,10 @@ public class BillplzController {
     public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl) {
         BigDecimal amount = money.multiply(new BigDecimal("100"));
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
-        // urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
-        urlParameters.add(new BasicNameValuePair("description", "Test callback"));
-        // urlParameters.add(new BasicNameValuePair("email", "853029827@qq.com"));
+        //urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
+        urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
+        //urlParameters.add(new BasicNameValuePair("description", "Test callback"));
+        urlParameters.add(new BasicNameValuePair("email", "853029827@qq.com"));
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
         urlParameters.add(new BasicNameValuePair("name", "Michael API V3"));
         urlParameters.add(new BasicNameValuePair("amount", amount.toString()));
