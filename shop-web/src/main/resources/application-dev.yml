@@ -5,13 +5,13 @@ spring:
   datasource:
     druid:
       first:  #数据源1
-        url: jdbc:mysql://120.76.174.8:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://47.254.197.138:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: root
-        password: tangchao@2020
+        password: onecity123
       second:  #数据源2
-        url: jdbc:mysql://120.76.174.8:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://47.254.197.138:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: root
-        password: tangchao@2020
+        password: onecity123
       driverClassName: com.mysql.jdbc.Driver
       #最大活跃数
       maxActive: 20
@@ -34,7 +34,7 @@ spring:
       #配置监控统计拦截的filters，去掉后监控界面sql将无法统计,'wall'用于防火墙
       filters: stat, wall, log4j
   redis:
-    host: 192.168.0.218
+    host: 127.0.0.0
     password: 123456
   jackson:
     #参数意义：
@@ -66,11 +66,11 @@ fdfs:
   tracker-list: # tracker地址
     - 192.168.0.218:22122
 tangchao:
-  secret: ly@Login(Auth}*^31)&chaoyuan%f3q2 # 登录校验的密钥
+  secret: ly@Login(Auth}*^31)&onecity%f3q2 # 登录校验的密钥
   pubKeyPath: D:\rsa.pub # 公钥地址
   priKeyPath: D:\rsa.pri # 私钥地址
   upload:
-    baseUrl: http://test.banmatongxiao.com/
+    baseUrl: http://test.onecityonline.com/
     allowTypes:
       - image/jpeg
       - image/png
