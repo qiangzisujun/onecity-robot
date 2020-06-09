@@ -74,5 +74,7 @@ public interface ShopOrderService {
 
     Map<String, String> payOrderAgainByBillplz(String orderId, HttpServletRequest request);
 
+    Map<String,String> payOrderByBillplz(Long userCode,HttpServletRequest request,Double money);
+
 
 }

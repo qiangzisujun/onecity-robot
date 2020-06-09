@@ -59,7 +59,7 @@ public class GoodsTypeServiceImpl implements GoodsTypeService {
     }
 
     @Override
-    public void addGoodsType(String  typeName,Long  typePid,Long userId) {
+    public void addGoodsType(String  typeName,Long  typePid,Long userId,String typeNameCN,String typeNameMa) {
         if (typeName == null || typePid==null) {
             throw new CustomerException(ExceptionEnum.GOODS_TYPE_IS_NOT);
         }
@@ -68,7 +68,9 @@ public class GoodsTypeServiceImpl implements GoodsTypeService {
             throw new CustomerException(ExceptionEnum.NOT_ADD_LAYER);
         }
         GoodsType goodsType = new GoodsType();
-        goodsType.setTypeName(typeName);
+        goodsType.setTypeNameZh(typeName);
+        goodsType.setTypeNameCn(typeNameCN);
+        goodsType.setTypeNameMa(typeNameMa);
         goodsType.setTypePid(typePid);
         goodsType.setTypeLayer(layer + 1);// 设置层级
         Integer maxSort = this.getMaxSortByPid(typePid);// 获取最大的排序值
@@ -93,7 +95,7 @@ public class GoodsTypeServiceImpl implements GoodsTypeService {
 
     @Override
     public void updateGoodsType(GoodsType goodsType) {
-        if (goodsType.getTypeName() == null || goodsType.getTypePid()==null) {
+        if (goodsType.getTypeNameZh() == null || goodsType.getTypePid()==null) {
             throw new CustomerException(ExceptionEnum.GOODS_TYPE_IS_NOT);
         }
         Long pid = goodsType.getTypePid();

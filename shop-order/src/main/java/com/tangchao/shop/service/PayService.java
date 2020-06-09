@@ -15,7 +15,9 @@ import java.util.Map;
  */
 public interface PayService {
 
-    Map<String,String> createBill(HttpServletRequest request, BigDecimal money);
+    Map<String,String> createBill(HttpServletRequest request, BigDecimal money,String notify);
 
     void webhook(WebhookParam webhookParam,HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException;
+
+    void userPaymentNotifyByWebhook(WebhookParam webhookParam, HttpServletRequest request);
 }

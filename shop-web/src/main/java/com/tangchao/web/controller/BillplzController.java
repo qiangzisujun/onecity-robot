@@ -135,6 +135,12 @@ public class BillplzController {
     }
 
 
+    // TODO: 2019/12/13 S-caHZmB_KjGJRLsgJ4cHjCA
+    @RequestMapping(value = "/userPaymentNotifyByWebhook",method = RequestMethod.POST)
+    public void userPaymentNotifyByWebhook(WebhookParam webhookParam,HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        payService.userPaymentNotifyByWebhook(webhookParam,request);
+    }
+
 
     public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl) {
         BigDecimal amount = money.multiply(new BigDecimal("100"));

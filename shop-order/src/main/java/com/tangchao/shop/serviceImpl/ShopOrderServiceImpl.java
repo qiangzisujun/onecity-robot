@@ -1523,14 +1523,20 @@ public class ShopOrderServiceImpl implements ShopOrderService {
             count = shopOrderMapper.updateByPrimaryKeySelective(shopOrder);
             if (count != 1)
                 throw new CustomerException(ExceptionEnum.USER_ACCOUNT_SETTINGS);
-            Map<String,String> map=payService.createBill(request,money);
+
+            String contextPath = request.getServerName();
+            String baseUrl = "http://" + contextPath.trim();
+            Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
             pay.setPaymentMoney(money.doubleValue());
             pay.setPaymentOrderNo(map.get("orderId"));
             return map;
         }
         BigDecimal totalPay = new BigDecimal(String.valueOf(shopOrder.getTotalPay()));
         BigDecimal divide = totalPay.divide(new BigDecimal("100"));
-        Map<String,String> map=payService.createBill(request,divide);
+
+        String contextPath = request.getServerName();
+        String baseUrl = "http://" + contextPath.trim();
+        Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
         pay.setPaymentMoney(divide.doubleValue());
         pay.setPaymentOrderNo(map.get("orderId"));
         return map;
@@ -1553,9 +1559,37 @@ public class ShopOrderServiceImpl implements ShopOrderService {
 
         BigDecimal totalPay = new BigDecimal(String.valueOf(order.getTotalPay()));
         BigDecimal divide = totalPay.divide(new BigDecimal("100"));
-        Map<String,String> map=payService.createBill(request,divide);
+        String contextPath = request.getServerName();
+        String baseUrl = "http://" + contextPath.trim();
+        Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
         return map;
 
+    }
+
+    @Override
+    public Map<String, String> payOrderByBillplz(Long userCode,HttpServletRequest request, Double money) {
+        if (userCode== null){
+            throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
+        }
+        Map<String,Object> resultMap=new HashMap<>();
+        //写入数据库
+        PaymentOrderPlatform pay=new PaymentOrderPlatform();
+        pay.setFlag(1);
+        pay.setPaymentMoney(money);
+        pay.setPaymentStatus(1);//未支付
+        pay.setPaymentTime(new Date());
+        pay.setPaymentUserCode(userCode.toString());
+        pay.setPaymentType(1);//unionpay
+        pay.setPaymentOrderNo(Long.toString(idWorker.nextId()));
+        pay.setPlatformType("CPNP");
+        int count=paymentOrderPlatformMapper.insertSelective(pay);
+        if (count==1){
+            logger.info("调用成功!");
+        }
+        String contextPath = request.getServerName();
+        String baseUrl = "http://" + contextPath.trim();
+        Map<String,String> map=payService.createBill(request,new BigDecimal(money),baseUrl+"/api/pay/billplz/userPaymentNotifyByWebhook");
+        return map;
     }
 
 

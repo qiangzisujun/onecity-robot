@@ -83,7 +83,7 @@
     </select>
 
     <select id="selectGoodsTypeList" resultType="com.tangchao.shop.vo.GoodsTypeVO">
-        select t.`id` id,t.`type_name` typeName,COUNT(t.`id`) countNum,GROUP_CONCAT(s.`id`) stageIds
+        select t.`id` id,t.`type_name_zh` typeName,t.`type_name_cn` as typeNameCn, t.`type_name_ma` as typeNameMa, COUNT(t.`id`) countNum,GROUP_CONCAT(s.`id`) stageIds
         from goods_stage s
         left join goods_type t on t.`flag` = 0 and s.`type_id` = t.`id`
         where s.`is_award` = 0 and s.`flag` = 0 and s.`is_activity` = 2

@@ -86,7 +86,7 @@ public class GoodsServiceImpl implements GoodsService {
 
 
         if (typeList!=null&&typeList.size()>0){
-            Map<Long,String> typeName=typeList.stream().collect(Collectors.toMap(t->t.getId(),t->t.getTypeName()));
+            Map<Long,String> typeName=typeList.stream().collect(Collectors.toMap(t->t.getId(),t->t.getTypeNameZh()));
             goodsList.forEach(s -> s.setTypeName(typeName.get(s.getTypeId())));
         }
 

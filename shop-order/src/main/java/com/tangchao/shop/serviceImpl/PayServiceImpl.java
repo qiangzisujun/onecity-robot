@@ -83,7 +83,7 @@ public class PayServiceImpl implements PayService {
 
 
     @Override
-    public Map<String,String> createBill(HttpServletRequest request, BigDecimal money) {
+    public Map<String,String> createBill(HttpServletRequest request, BigDecimal money,String notify) {
 
         String contextPath = request.getServerName();
         String baseUrl = "http://" + contextPath.trim();
@@ -110,7 +110,7 @@ public class PayServiceImpl implements PayService {
         // HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
         httppost.setHeader("Authorization", "Basic " + encoding);
         try {
-            httppost.setEntity(new UrlEncodedFormEntity(getData(money, userInfo.getUserMobile(), baseUrl)));
+            httppost.setEntity(new UrlEncodedFormEntity(getData(money, userInfo.getUserMobile(), baseUrl,notify)));
         } catch (UnsupportedEncodingException ex) {
             log.error(ex.getMessage());
         }
@@ -150,7 +150,7 @@ public class PayServiceImpl implements PayService {
     }
 
 
-    public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl) {
+    public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl,String notify) {
         BigDecimal amount = money.multiply(new BigDecimal("100"));
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
@@ -160,7 +160,7 @@ public class PayServiceImpl implements PayService {
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
         urlParameters.add(new BasicNameValuePair("name", "Michael API V3"));
         urlParameters.add(new BasicNameValuePair("amount", amount.toString()));
-        urlParameters.add(new BasicNameValuePair("callback_url", baseUrl + "/api/pay/billplz/webhook"));
+        urlParameters.add(new BasicNameValuePair("callback_url", notify));
         urlParameters.add(new BasicNameValuePair("redirect_url", baseUrl));
         return urlParameters;
     }
@@ -338,6 +338,73 @@ public class PayServiceImpl implements PayService {
                         log.info("==================================三级分佣开始===========");
                         this.threeLevelDistribution(shopOrder, customer.getInviteId(), remindSpec);
                     }
+                    log.warn(request.getParameter("out_trade_no") + "回调处理成功！");
+
+                } else {
+                    log.error("数据已经处理过！无需重复处理！");
+                }
+
+            } else {
+                log.error("数据给修改过");
+            }
+            log.warn("________________________________________________________________________");
+            // return null;
+
+        }
+    }
+
+    @Override
+    public void userPaymentNotifyByWebhook(WebhookParam webhookParam, HttpServletRequest request) {
+        log.warn("________________________" + LocalDateTime.now().toString() + "________________________");
+        Boolean check = check(webhookParam);
+        if (check) {
+            log.error("数据一致");
+            log.error(webhookParam.toString());
+            PaymentOrderPlatform platform = new PaymentOrderPlatform();
+            platform.setPaymentOrderNo(webhookParam.getId());
+            platform = paymentOrderPlatformMapper.selectOne(platform);
+
+            if (platform.getPaymentStatus().equals("1")) {
+
+                paymentOrderPlatformMapper.updatePlatformTradeNo(webhookParam.getId(), platform.getId());
+                if (webhookParam.getAmount().equals(webhookParam.getPaid_amount())){
+                    log.info("发起支付金额和实际支付一样！");
+                    //  给用户充值福分
+                    CustomerInfo payCustomer = new CustomerInfo();
+                    payCustomer.setCustomerCode(Long.valueOf(platform.getPaymentUserCode()));
+                    payCustomer=customerInfoMapper.selectOne(payCustomer);
+                    UserConf rechargeConf = configService.selectCmsValue(ConfigkeyConstant.MALL_USER_RECHARGE_GIVE);
+                    double userMoney=Double.valueOf(webhookParam.getAmount());
+                    if (rechargeConf != null && !StringUtils.isEmpty(rechargeConf.getConfValue())) {
+                        String[] array1 = rechargeConf.getConfValue().split("/");
+                        if (array1.length == 2) {
+                            double amountX = Double.parseDouble(array1[0]);
+                            double amountY = Double.parseDouble(array1[1]);
+                            if (userMoney >= amountX) {// 判断开关 金额是否已达到可以送金额的数量
+                                long x = (long) (userMoney / amountX);
+                                Double userAmount = ArithUtil.mul(x, amountY);
+                                userMoney = userMoney + userAmount;
+                            }
+                        } else {
+                            log.error("配置格式：X/Y,X为充值金额,Y为赠送金额");
+                        }
+
+                    }
+                    int rowCount = customerInfoMapper.addAmount(Long.valueOf(platform.getPaymentUserCode()), userMoney, 0.00, 1L);
+                    if (rowCount > 0) {
+                        CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
+                        customerRechargeRecord.setAmount(userMoney);
+                        customerRechargeRecord.setCustomerCode(payCustomer.getCustomerCode());
+                        customerRechargeRecord.setIntegral(0.00);
+                        customerRechargeRecord.setType(1);//'充值消费标识{ 1：充值，2：消费 , 3 :佣金提现 ,4佣金充值}',
+                        customerRechargeRecord.setPayment(PayStatusConstant.PAY_FROM_WECHAT);//微信
+                        customerRechargeRecord.setCreateTime(new Date());
+                        int rowResult = this.customerRechargeRecordMapper.insertSelective(customerRechargeRecord);
+                        if (rowResult== 1) {
+                            log.info("会员余额充值记录");
+                        }
+                    }
+                    log.info("修改用户积分!");
                     log.warn(request.getParameter("out_trade_no") + "回调处理成功！");
 
                 } else {

@@ -21,4 +21,10 @@ public class GoodsTypeVO implements Serializable {
 
     @ApiModelProperty(value = "商品期数Id", name = "stageIds")
     private String stageIds;
+
+    @ApiModelProperty(value = "分类名称", name = "typeName")
+    private String typeNameCn;
+
+    @ApiModelProperty(value = "分类名称", name = "typeName")
+    private String typeNameMa;
 }

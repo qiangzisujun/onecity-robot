@@ -5,13 +5,13 @@ spring:
   datasource:
     druid:
       first:  #数据源1
-        url: jdbc:mysql://47.254.197.138:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: tangchao
-        password: tckj2020
+        url: jdbc:mysql://192.168.1.105:3306/maylai?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        username: root
+        password: 860701liu
       second:  #数据源2
-        url: jdbc:mysql://47.254.197.138:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: tangchao
-        password: tckj2020
+        url: jdbc:mysql://192.168.1.105:3306/maylai?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        username: root
+        password: 860701liu
       driverClassName: com.mysql.jdbc.Driver
       #最大活跃数
       maxActive: 20
@@ -35,7 +35,6 @@ spring:
       filters: stat, wall, log4j
   redis:
     host: 127.0.0.1
-    ssword: 123456
   jackson:
     #参数意义：
     #JsonInclude.Include.ALWAYS              默认

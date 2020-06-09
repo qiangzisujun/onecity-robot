@@ -7,7 +7,7 @@ import java.util.List;
 public interface GoodsTypeService {
     List<GoodsType> goodsTypeList();
 
-    void addGoodsType(String  typeName,Long  typePid,Long userId);
+    void addGoodsType(String  typeName,Long  typePid,Long userId,String typeNameCN,String typeNameMa);
 
     void updateGoodsType(GoodsType goodsType);
 
