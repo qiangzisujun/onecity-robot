@@ -1,12 +1,7 @@
 spring:
   datasource:
-    url: jdbc:mysql://172.24.187.235:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: onecity123
     driverClassName: com.mysql.jdbc.Driver
   redis:
-    host: 172.24.187.235
-    password: onecity123
   jackson:
     #参数意义：
     #JsonInclude.Include.ALWAYS              默认

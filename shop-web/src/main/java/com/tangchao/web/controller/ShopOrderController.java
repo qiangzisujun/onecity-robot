@@ -127,8 +127,8 @@ public class ShopOrderController {
         return ResponseEntity.ok(shopOrderService.userPaymentNotifyByPayBOB(request));
     }
     @PostMapping("payBob")
-    public ResponseEntity<Map<String,String>> userRechargeByPayBoB(@RequestBody ModifyAddressParam modifyAddressParam) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        return  ResponseEntity.ok(shopOrderService.payOrderByBoB(modifyAddressParam));
+    public ResponseEntity<Map<String,String>> userRechargeByPayBoB(@RequestBody ModifyAddressParam modifyAddressParam,HttpServletRequest request){
+        return  ResponseEntity.ok(shopOrderService.payOrderByBillplz(request,modifyAddressParam));
     }
 
     @ApiOperation("二维码支付")
@@ -139,7 +139,9 @@ public class ShopOrderController {
 
     @ApiOperation(value = "订单再次支付")
     @GetMapping("payOrderAgain")
-    public ResponseEntity<Map<String,String>> payOrderAgain(@RequestParam(value = "orderId", required = false) String orderId, HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        return ResponseEntity.ok(shopOrderService.payOrderAgain(orderId, request));
+    public ResponseEntity<Map<String,String>> payOrderAgain(@RequestParam(value = "orderId", required = false) String orderId, HttpServletRequest request){
+        return ResponseEntity.ok(shopOrderService.payOrderAgainByBillplz(orderId, request));
     }
+
+
 }

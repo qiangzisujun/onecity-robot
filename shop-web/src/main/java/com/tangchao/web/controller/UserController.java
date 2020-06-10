@@ -5,6 +5,7 @@ import com.tangchao.common.constant.SmsTemplateTypeConstant;
 import com.tangchao.shop.dto.UserDTO;
 import com.tangchao.shop.pojo.*;
 import com.tangchao.shop.service.SendSmsMessageService;
+import com.tangchao.shop.service.ShopOrderService;
 import com.tangchao.shop.utils.PayHelper;
 import com.tangchao.shop.vo.CustomerAddressVO;
 import com.tangchao.shop.vo.UserVO;
@@ -39,6 +40,9 @@ public class UserController {
 
     @Autowired
     private SendSmsMessageService smsMessageService;
+
+    @Autowired
+    private ShopOrderService shopOrderService;
 
     @ApiOperation(value = "用户账号密码登陆")
     @PostMapping("/login")
@@ -299,5 +303,11 @@ public class UserController {
     @GetMapping("/getCustomerSignIn")
     public ResponseEntity<Map<String,Object>> getCustomerSignIn() throws ParseException {
         return ResponseEntity.ok(customerService.getCustomerSignIn());
+    }
+
+    @ApiOperation("积分充值")
+    @GetMapping("/customerRechargeByBillplz")
+    public ResponseEntity<Map<String,String>> customerRechargeByBillplz(@LoginUser Long userCode,@ApiParam(value = "充值金额",name = "money") @RequestParam(value = "money") Double money,HttpServletRequest request){
+        return  ResponseEntity.ok(shopOrderService.payOrderByBillplz(userCode,request,money));
     }
 }

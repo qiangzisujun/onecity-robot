@@ -137,7 +137,7 @@ public class ShopGoodsController {
     @ApiOperation(value = "新增商品分类")
     @PostMapping("/addGoodsType")
     public ResponseEntity<Void>  addGoodsType(@LoginUser Long userId,@RequestBody ShopGoodsType type){
-        shopGoodsTypeService.addGoodsType(type.getTypeName(),type.getTypePid(),userId);
+        shopGoodsTypeService.addGoodsType(type.getTypeNameZh(),type.getTypePid(),userId,type.getTypeNameCn(),type.getTypeNameMa());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

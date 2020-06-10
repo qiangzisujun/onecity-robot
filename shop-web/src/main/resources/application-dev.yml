@@ -5,14 +5,10 @@ spring:
   datasource:
     druid:
       first:  #数据源1
-        url: jdbc:mysql://47.254.197.138:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: root
-        password: onecity123
-      second:  #数据源2
-        url: jdbc:mysql://47.254.197.138:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: root
-        password: onecity123
-      driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://120.76.174.8:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai        username: root
+        password: tangchao@2020      second:  #数据源2
+        url: jdbc:mysql://120.76.174.8:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai        username: root
+        password: tangchao@2020      driverClassName: com.mysql.jdbc.Driver
       #最大活跃数
       maxActive: 20
       #初始化数量
@@ -34,8 +30,6 @@ spring:
       #配置监控统计拦截的filters，去掉后监控界面sql将无法统计,'wall'用于防火墙
       filters: stat, wall, log4j
   redis:
-    host: 127.0.0.0
-    password: 123456
   jackson:
     #参数意义：
     #JsonInclude.Include.ALWAYS              默认

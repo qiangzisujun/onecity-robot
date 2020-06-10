@@ -43,7 +43,7 @@ public class GoodsController {
     @ApiOperation(value = "新增商品分类")
     @PostMapping("/addGoodsType")
     public ResponseEntity<Void>  addGoodsType(@LoginUser Long userId,@RequestBody GoodsType type){
-        goodsTypeService.addGoodsType(type.getTypeName(),type.getTypePid(),userId);
+        goodsTypeService.addGoodsType(type.getTypeNameZh(),type.getTypePid(),userId,type.getTypeNameCn(),type.getTypeNameMa());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

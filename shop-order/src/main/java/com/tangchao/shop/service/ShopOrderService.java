@@ -68,4 +68,13 @@ public interface ShopOrderService {
     String userPayCode(Long userCode, String urlText) throws Exception;
 
     Map<String, String> payOrderAgain(String orderId, HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException;
+
+
+    Map<String,String> payOrderByBillplz(HttpServletRequest request,ModifyAddressParam modifyAddressParam);
+
+    Map<String, String> payOrderAgainByBillplz(String orderId, HttpServletRequest request);
+
+    Map<String,String> payOrderByBillplz(Long userCode,HttpServletRequest request,Double money);
+
+
 }

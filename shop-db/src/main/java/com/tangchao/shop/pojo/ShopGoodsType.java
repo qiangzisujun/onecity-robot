@@ -38,8 +38,16 @@ public class ShopGoodsType implements TreeEntity<GoodsType> {
     // 父级id
     private Long typePid;
 
-    // 类型名称
-    private String typeName;
+    // 类型名称 中文
+    private String typeNameZh;
+
+
+    // 类型名称 马来文
+    private String typeNameMa;
+
+
+    // 类型名称 英文
+    private String typeNameCn;
 
     // 默认第一级，共3级
     private Integer typeLayer;

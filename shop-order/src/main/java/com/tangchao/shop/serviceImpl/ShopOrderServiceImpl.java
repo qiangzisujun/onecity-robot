@@ -17,6 +17,7 @@ import com.tangchao.shop.interceptor.UserInterceptor;
 import com.tangchao.shop.mapper.*;
 import com.tangchao.shop.params.*;
 import com.tangchao.shop.pojo.*;
+import com.tangchao.shop.service.PayService;
 import com.tangchao.shop.service.ShopOrderService;
 import com.tangchao.shop.utils.*;
 import com.tangchao.shop.vo.OrderResponse;
@@ -126,6 +127,12 @@ public class ShopOrderServiceImpl implements ShopOrderService {
 
     @Autowired
     private PaymentChannelMapper paymentChannelMapper;
+
+    @Autowired
+    private PaymentOrderPlatformMapper paymentOrderPlatformMapper;
+
+    @Autowired
+    private PayService payService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -1424,12 +1431,166 @@ public class ShopOrderServiceImpl implements ShopOrderService {
         return map;
     }
 
-/*    public static void main(String[] args) {
-        Map<String,Object> map=new HashMap<>();
-        map.put("payjs_order_id",shopOrder.getPlatformOrderNo());
-        map.put("mchid","1584324971");
-        map.put("key","wv06wj1NDwBquw1P");
-        map= PayHelperByBOB.wxRefund(map);
-    }*/
+    @Override
+    public Map<String, String> payOrderByBillplz(HttpServletRequest request,ModifyAddressParam modifyAddressParam) {
+        //获取用户登录
+        UserInfo user = UserInterceptor.getUserInfo();
+        if (user == null) throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
+        //获取用户选择的收货地址相关信息
+        StringBuilder address = new StringBuilder();
+        String zipCode = "";
+        String userName = "";
+        String userMobile = "";
+        if (!String.valueOf(modifyAddressParam.getAddressId()).equals("0")) {
+            CustomerAddress customerAddress = addressMapper.selectByPrimaryKey(modifyAddressParam.getAddressId());
+            zipCode = customerAddress.getZipCode();
+            userName = customerAddress.getUserName();
+            userMobile = customerAddress.getUserMobile();
+            address.append(customerAddress.getProvince() != null ? customerAddress.getProvince() : "" )
+                    .append(customerAddress.getCity() != null ? customerAddress.getCity() : "" )
+                    .append(customerAddress.getArea() != null ? customerAddress.getArea() : "" )
+                    .append(customerAddress.getStreet() != null ? customerAddress.getStreet() : "" )
+                    .append(customerAddress.getDetailed() != null ? customerAddress.getDetailed() : "" );
+        }
+        ShopOrder shopOrder = shopOrderMapper.selectByPrimaryKey(modifyAddressParam.getOrderId());
+        if (shopOrder == null)
+            throw new CustomerException(ExceptionEnum.ORDER_NOT_ERROR);
+        shopOrder.setReceiverAddress(address.toString());
+        shopOrder.setUserName(userName);
+        shopOrder.setUserMobile(userMobile);
+        shopOrder.setZipCode(zipCode);
+        Integer count = shopOrderMapper.updateByPrimaryKeySelective(shopOrder);
+        if (count != 1)
+            throw new CustomerException(ExceptionEnum.USER_ACCOUNT_SETTINGS);
+
+
+        PaymentOrderPlatform pay=new PaymentOrderPlatform();
+        pay.setFlag(1);
+
+        pay.setPaymentStatus(1);//未支付
+        pay.setPaymentTime(new Date());
+        pay.setPaymentUserCode(user.getUserCode().toString());
+        pay.setPaymentType(1);//Billplz
+
+        pay.setPlatformType("Billplz");
+        paymentOrderPlatformMapper.insertSelective(pay);
+
+
+        // TODO: 2020.2.21 抵用消费券
+        String couponCode = modifyAddressParam.getCouponCode();
+        if (couponCode != null) {
+            Example exampleUserCoupon = new Example(UserCoupon.class);
+            Example.Criteria criteriaUserCoupon = exampleUserCoupon.createCriteria();
+            criteriaUserCoupon.andEqualTo("couponCode", couponCode);
+            criteriaUserCoupon.andEqualTo("couponStatus", 0);
+            criteriaUserCoupon.andEqualTo("datalevel", 1);
+            criteriaUserCoupon.andGreaterThan("efectiveTime", new Date());
+            UserCoupon userCoupon = userCouponMapper.selectOneByExample(exampleUserCoupon);
+            if (userCoupon == null) {
+                throw new CustomerException(ExceptionEnum.CREATE_ORDER_ERROR);
+            }
+            BigDecimal multiply = userCoupon.getCouponAmount();
+
+            Example exampleDetail = new Example(ShopOrderDetail.class);
+            Example.Criteria criteriaDetail = exampleDetail.createCriteria();
+            criteriaDetail.andEqualTo("orderId", shopOrder.getOrderId());
+            ShopOrderDetail shopOrderDetail = detailMapper.selectOneByExample(exampleDetail);
+            Long goodsId = shopOrderDetail.getGoodsId();
+
+            ShopGoods shopGoods = goodsMapper.selectByPrimaryKey(goodsId);
+            BigDecimal discount = shopGoods.getDiscount();
+
+            BigDecimal result = BigDecimal.ZERO;
+            if(multiply.compareTo(discount) > -1){
+                System.out.println("a大于等于b");
+                result = discount;
+            }
+            if(multiply.compareTo(discount) == -1){
+                System.out.println("a小于b");
+                result = multiply;
+            }
+            BigDecimal totalPay = new BigDecimal(String.valueOf(shopOrder.getTotalPay()));
+            BigDecimal divide = totalPay.divide(new BigDecimal("100"));
+            BigDecimal money = divide.subtract(result);
+
+
+            //更改优惠券状态
+            userCoupon.setCouponStatus(1);
+            userCouponMapper.updateByPrimaryKey(userCoupon);
+
+
+            shopOrder.setTotalPay(Long.valueOf(SignUtil.convertAmount(money.toString())));
+            count = shopOrderMapper.updateByPrimaryKeySelective(shopOrder);
+            if (count != 1)
+                throw new CustomerException(ExceptionEnum.USER_ACCOUNT_SETTINGS);
+
+            String contextPath = request.getServerName();
+            String baseUrl = "http://" + contextPath.trim();
+            Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
+            pay.setPaymentMoney(money.doubleValue());
+            pay.setPaymentOrderNo(map.get("orderId"));
+            return map;
+        }
+        BigDecimal totalPay = new BigDecimal(String.valueOf(shopOrder.getTotalPay()));
+        BigDecimal divide = totalPay.divide(new BigDecimal("100"));
+
+        String contextPath = request.getServerName();
+        String baseUrl = "http://" + contextPath.trim();
+        Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
+        pay.setPaymentMoney(divide.doubleValue());
+        pay.setPaymentOrderNo(map.get("orderId"));
+        return map;
+    }
+
+    @Override
+    public Map<String, String> payOrderAgainByBillplz(String orderId, HttpServletRequest request) {
+        //获取用户登录
+        UserInfo user = UserInterceptor.getUserInfo();
+        if (user== null) {
+            throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
+        }
+        ShopOrder order = new ShopOrder();
+        order.setStatus(1);
+        order.setOrderId(orderId);
+        ShopOrder newOrder = shopOrderMapper.selectOne(order);
+        if (newOrder == null) {//订单不存在
+            throw new CustomerException(ExceptionEnum.ORDER_NOT_ERROR);
+        }
+
+        BigDecimal totalPay = new BigDecimal(String.valueOf(order.getTotalPay()));
+        BigDecimal divide = totalPay.divide(new BigDecimal("100"));
+        String contextPath = request.getServerName();
+        String baseUrl = "http://" + contextPath.trim();
+        Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
+        return map;
+
+    }
+
+    @Override
+    public Map<String, String> payOrderByBillplz(Long userCode,HttpServletRequest request, Double money) {
+        if (userCode== null){
+            throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
+        }
+        Map<String,Object> resultMap=new HashMap<>();
+        //写入数据库
+        PaymentOrderPlatform pay=new PaymentOrderPlatform();
+        pay.setFlag(1);
+        pay.setPaymentMoney(money);
+        pay.setPaymentStatus(1);//未支付
+        pay.setPaymentTime(new Date());
+        pay.setPaymentUserCode(userCode.toString());
+        pay.setPaymentType(1);//unionpay
+        pay.setPaymentOrderNo(Long.toString(idWorker.nextId()));
+        pay.setPlatformType("CPNP");
+        int count=paymentOrderPlatformMapper.insertSelective(pay);
+        if (count==1){
+            logger.info("调用成功!");
+        }
+        String contextPath = request.getServerName();
+        String baseUrl = "http://" + contextPath.trim();
+        Map<String,String> map=payService.createBill(request,new BigDecimal(money),baseUrl+"/api/pay/billplz/userPaymentNotifyByWebhook");
+        return map;
+    }
+
 
 }

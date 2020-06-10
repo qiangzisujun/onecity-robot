@@ -10,7 +10,7 @@ public interface ShopGoodsTypeService {
 
     List<ShopGoodsType> goodsTypeList();
 
-    void addGoodsType(String typeName, Long typePid, Long userId);
+    void addGoodsType(String typeName, Long typePid, Long userId,String typeNameCN,String typeNameMa);
 
     void updateGoodsType(ShopGoodsType goodsType);
 
