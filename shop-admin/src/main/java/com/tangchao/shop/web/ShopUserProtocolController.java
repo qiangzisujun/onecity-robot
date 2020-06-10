@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /* *
  * @Author qiangzi
  * @Description
@@ -44,8 +46,8 @@ public class ShopUserProtocolController {
     }
 
     @ApiOperation("获取用户协议")
-    @PostMapping("show")
-    private ResponseEntity<UserProtocol> getUserProtocol(){
+    @GetMapping("show")
+    private ResponseEntity<List<UserProtocol>> getUserProtocol(){
         return ResponseEntity.ok(userProtocolService.getUserProtocol());
     }
 }

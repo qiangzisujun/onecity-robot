@@ -2,6 +2,8 @@ package com.tangchao.shop.service;
 
 import com.tangchao.shop.pojo.UserProtocol;
 
+import java.util.List;
+
 /* *
  * @Author qiangzi
  * @Description
@@ -10,7 +12,7 @@ import com.tangchao.shop.pojo.UserProtocol;
 public interface UserProtocolService {
 
 
-    UserProtocol getUserProtocol();
+    List<UserProtocol> getUserProtocol();
 
     void  insertUserProtocol(UserProtocol protocol);
 

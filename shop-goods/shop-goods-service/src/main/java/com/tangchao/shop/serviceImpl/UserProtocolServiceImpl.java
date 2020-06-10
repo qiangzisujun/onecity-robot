@@ -25,14 +25,11 @@ public class UserProtocolServiceImpl implements UserProtocolService {
     private UserProtocolMapper userProtocolMapper;
 
     @Override
-    public UserProtocol getUserProtocol() {
+    public List<UserProtocol> getUserProtocol() {
         UserProtocol protocol=new UserProtocol();
         protocol.setFlag(0);
         List<UserProtocol> list=userProtocolMapper.select(protocol);
-        if (!CollectionUtils.isEmpty(list)){
-            return list.get(0);
-        }
-        return null;
+        return list;
     }
 
     @Override

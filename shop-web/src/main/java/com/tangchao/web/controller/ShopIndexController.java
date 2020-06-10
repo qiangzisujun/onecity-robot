@@ -75,8 +75,8 @@ public class ShopIndexController {
     }
 
     @ApiOperation("获取用户协议")
-    @PostMapping("/show")
-    private ResponseEntity<UserProtocol> getUserProtocol(){
+    @GetMapping("/show")
+    private ResponseEntity<List<UserProtocol>> getUserProtocol(){
         return ResponseEntity.ok(userProtocolService.getUserProtocol());
     }
 
