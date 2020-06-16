@@ -158,7 +158,7 @@ import java.util.stream.Collectors;
         // 设置排序
         String orderBy = stageDTO.getOrderBy();
         if (StringUtils.isEmpty(orderBy) || "default".equals(orderBy)) {// 默认人气排序
-            PageHelper.orderBy("goods_hot desc,stage_index desc");
+            PageHelper.orderBy("goods_hot desc,id asc");
         } else if (orderBy.equals("priceDesc")) {
             PageHelper.orderBy("goods_price desc"); //(价值降序)
         } else if (orderBy.equals("priceAsc")) {

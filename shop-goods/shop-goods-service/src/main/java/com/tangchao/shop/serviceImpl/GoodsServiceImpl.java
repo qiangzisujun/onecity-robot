@@ -169,7 +169,7 @@ public class GoodsServiceImpl implements GoodsService {
     @Override
     public PageResult<Goods> sellgoods(Integer pageNo, Integer pageSize, String goodsName, Integer typeId) {
         PageHelper.startPage(pageNo,pageSize);
-        PageHelper.orderBy("r.goods_hot desc");
+        PageHelper.orderBy("r.goods_hot desc,i.id asc");
         List<Goods> goods = goodsMapper.selectSellGoodsList(goodsName, typeId);
         PageInfo<Goods> goodsPageInfo = new PageInfo<>(goods);
         return new PageResult<>(goodsPageInfo.getTotal(),goods);
