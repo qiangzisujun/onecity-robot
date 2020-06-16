@@ -5,16 +5,10 @@ spring:
   datasource:
     druid:
       first:  #数据源1
-        url: jdbc:mysql://172.18.33.53:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: root
-        password: tangchao@2020
         url: jdbc:mysql://172.24.187.235:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: tangchao
         password: tckj2020
       second:  #数据源2
-        url: jdbc:mysql://172.18.33.53:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: root
-        password: tangchao@2020
         url: jdbc:mysql://172.24.187.235:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: tangchao
         password: tckj2020
@@ -41,9 +35,6 @@ spring:
       filters: stat, wall, log4j
   redis:
     host: 172.24.187.235
-    password: tangchao@2020
-    host: 127.0.0.1
-
   jackson:
     #参数意义：
     #JsonInclude.Include.ALWAYS              默认
