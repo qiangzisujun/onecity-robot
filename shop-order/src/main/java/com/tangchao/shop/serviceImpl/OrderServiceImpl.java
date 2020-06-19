@@ -276,6 +276,37 @@ public class OrderServiceImpl implements OrderService {
             customerInfo.setCustomerCode(user.getUserCode());
             List<CustomerInfo> customerList = customerInfoMapper.select(customerInfo);
             customerInfo = customerList.get(0);
+
+            //是否使用福分抵扣,后续添加的功能
+            if(isUse==1){
+                // 获取用户的可用积分
+                double score = customerInfo.getUserScore();
+                // 计算积分抵扣金额，与消费积分
+                UserConf conf = this.confService.selectCmsValue(ConfigkeyConstant.MALL_ORDER_SCORE_DEDUCTION);
+                if (null != conf) {
+                    String[] scoreConfArray = conf.getConfValue().split("/");
+                    long value = (long) (Double.parseDouble(scoreConfArray[0]) / Double.parseDouble(scoreConfArray[1]));
+                    // 最多可抵扣金额 100
+                    long result = (long) score / value;
+                    // 订单最多可抵扣金额
+                    if(orderInfo.getMinPayMoney() == null) {
+                        orderInfo.setMinPayMoney(0.0);
+                    }
+                    Double maxMoney = ArithUtil.sub(orderInfo.getOrderTotal(), orderInfo.getMinPayMoney());
+                    if (result > maxMoney) {
+                        result = result - (result - maxMoney.longValue());
+                    }
+                    // 设置抵扣金额
+                    orderInfo.setScoreDeductionMoney((double) result);
+                    // 设置需要消费积分
+                    orderInfo.setConsumeScore(result * value);
+                    count=tradeOrderMapper.updateByPrimaryKeySelective(orderInfo);
+                    if (count!=1){
+                        throw new CustomerException(ExceptionEnum.ORDER_PAYMENT_ERROR);
+                    }
+                }
+            }
+
             if (customerInfo.getUserMoney() + orderInfo.getScoreDeductionMoney() < orderInfo.getGoodsTotal()) {
                 // 余额不足
                 throw new CustomerException(ExceptionEnum.USER_BALANCE_INSUFFICIENT);

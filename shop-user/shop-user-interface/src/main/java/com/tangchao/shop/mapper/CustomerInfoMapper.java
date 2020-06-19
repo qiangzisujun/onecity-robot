@@ -16,8 +16,6 @@ public interface CustomerInfoMapper extends Mapper<CustomerInfo> {
     @Update("UPDATE customer_info SET user_money = user_money - #{money}, user_score = #{score} WHERE customer_code = #{customerCode} and user_money>=#{money}")
     int customerConsume(@Param("money") Double money, @Param("score") Double score, @Param("customerCode") Long customerCode);
 
-    @Update("update customer_info set user_money=user_score+#{money}  where customer_code=#{customerCode}")
-    int updateCustomerMoney(@Param("customerCode") Long customerCode, @Param("money") Long money);
 
     @Update("UPDATE customer_info set user_money = user_money + #{userMoney},user_score = user_score + #{userScore},last_modify_id = #{lastModifyId}  WHERE customer_code = #{customerCode}")
     int addAmount(@Param("customerCode")Long customerCode,@Param("userMoney")Double userMoney,

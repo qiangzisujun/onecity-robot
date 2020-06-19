@@ -217,4 +217,10 @@ public abstract class ConfigkeyConstant {
      */
     public static final String MALL_PAY_SUCCESS_URL = "mall.pay.success.url";
 
+    /**
+     * 连续签到7天获得积分
+     */
+    public static final String MALL_USER_SIGN_GIVE_SCORE_Seven_DAYS = "mall.user.sign.give.score.seven.days";
+
+
 }
