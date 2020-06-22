@@ -222,5 +222,9 @@ public abstract class ConfigkeyConstant {
      */
     public static final String MALL_USER_SIGN_GIVE_SCORE_Seven_DAYS = "mall.user.sign.give.score.seven.days";
 
+    /**
+     * 连续签到阶段
+     */
+    public static final String MALL_USER_SIGN_GIVE_SCORE_LEVEL = "mall.user.sign.give.score.level";
 
 }

@@ -11,10 +11,7 @@ import com.tangchao.shop.dto.adminDTO.CustomerDTO;
 import com.tangchao.shop.pojo.*;
 import com.tangchao.shop.service.*;
 import com.tangchao.shop.vo.*;
-import com.tangchao.user.service.CmsConfigService;
-import com.tangchao.user.service.CustomerScoreDetailService;
-import com.tangchao.user.service.CustomerService;
-import com.tangchao.user.service.CustomerWithdrawRecordService;
+import com.tangchao.user.service.*;
 import com.tangchao.web.annotation.LoginUser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +27,7 @@ import javax.ws.rs.GET;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +69,9 @@ public class CustomerHomeController {
 
     @Autowired
     private LotteryService lotteryService;
+
+    @Autowired
+    private CustomerSignService signService;
 
     @ApiOperation("提现记录")
     @GetMapping(value = "/customerWithdrawRecord")
@@ -404,5 +405,11 @@ public class CustomerHomeController {
                                                              @ApiParam(value = "状态:0进行中,1已揭晓",name = "openWinningStatus") @RequestParam(value = "openWinningStatus") Integer openWinningStatus) {
 
         return ResponseEntity.ok(lotteryService.selectBuyDetail(userCode,null,goodsNo,goodsStage));
+    }
+
+    @ApiOperation("用户签到")
+    @GetMapping("/addCustomerSignIn")
+    public ResponseEntity<Map<String,Object>> addCustomerSignIn(){
+        return ResponseEntity.ok(signService.insertCustomerSignRecord());
     }
 }

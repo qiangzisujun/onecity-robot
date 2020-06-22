@@ -108,7 +108,8 @@ public class CustomerSignServiceImpl implements CustomerSignService {
 
         }
 
-
+        //查询阶段
+        UserConf level=configService.selectCmsValue(ConfigkeyConstant.MALL_USER_SIGN_GIVE_SCORE_LEVEL);
 
         signRecord.setContinuousDay(num+1);
         signRecord.setExplanation("第"+num+1+"天签到得积分");
@@ -117,7 +118,7 @@ public class CustomerSignServiceImpl implements CustomerSignService {
         CustomerScoreDetail detail = new CustomerScoreDetail();
 
         Double score=0.0;
-        if (num==7){
+        if (level.getConfValue().equals(num)){
             score=(double) sevenDays; // 积分
         }else{
             score=(double) integral; // 积分
