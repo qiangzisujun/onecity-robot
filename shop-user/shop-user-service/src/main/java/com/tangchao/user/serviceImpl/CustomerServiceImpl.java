@@ -142,6 +142,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private CustomerSignRecordMapper signRecordMapper;
 
+    @Autowired
+    private UserSignRecordMapper userSignRecordMapper;
+
     @Override
     @DataSource(name = DataSourceNames.SECOND)
     public UserDTO queryUserByUserNameAndPassword(String phone, String password) {
@@ -703,6 +706,19 @@ public class CustomerServiceImpl implements CustomerService {
         if (null!=customerInfo.getUserScore()&&null!=customerInfo.getRegisterScore()){
             customerVO.setIntegral(customerInfo.getUserScore()+customerInfo.getRegisterScore());
         }
+
+        //获取签到天数
+        PageHelper.startPage(1,1);
+        PageHelper.orderBy("id desc");
+        UserSignRecord signRecord=new UserSignRecord();
+        signRecord.setCustomerCode(customerInfo.getCustomerCode());
+        List<UserSignRecord> list=userSignRecordMapper.select(signRecord);
+        if (CollectionUtils.isEmpty(list)){
+            customerVO.setSignInDays(0);
+        }else {
+            customerVO.setSignInDays(list.get(0).getContinuousDay());
+        }
+
         return customerVO;
     }
 

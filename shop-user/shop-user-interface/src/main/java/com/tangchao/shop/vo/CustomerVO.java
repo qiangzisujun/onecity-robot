@@ -47,4 +47,7 @@ public class CustomerVO implements Serializable {
 
     @ApiModelProperty(value = "是否为充值会员{ 0：不是，1：是 }", name = "isSupplier")
     private Integer isSupplier;
+
+    @ApiModelProperty(value = "连续签到天数", name = "signInDays")
+    private Integer signInDays;
 }
