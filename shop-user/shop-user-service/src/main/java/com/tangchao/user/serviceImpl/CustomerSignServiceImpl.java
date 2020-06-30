@@ -102,7 +102,7 @@ public class CustomerSignServiceImpl implements CustomerSignService {
             }
 
             //判断是否是连续
-            if (!(DateUtil.betweenDay(new Date(),signRecord.getSignDate(),false)<=1)){
+            if (!(DateUtil.betweenDay(new Date(),list.get(0).getSignDate(),false)<=1)){
                 num=0;//不连续签到重置为0
             }
 
@@ -112,7 +112,7 @@ public class CustomerSignServiceImpl implements CustomerSignService {
         UserConf level=configService.selectCmsValue(ConfigkeyConstant.MALL_USER_SIGN_GIVE_SCORE_LEVEL);
 
         signRecord.setContinuousDay(num+1);
-        signRecord.setExplanation("第"+num+1+"天签到得积分");
+        signRecord.setExplanation("第"+(num+1)+"天签到得积分");
         signRecord.setSignDate(new Date());
 
         CustomerScoreDetail detail = new CustomerScoreDetail();
@@ -135,10 +135,44 @@ public class CustomerSignServiceImpl implements CustomerSignService {
         customerScoreDetailMapper.insertSelective(detail);
 
         //修改积分
-        customerInfoMapper.addAmount(user.getUserCode(),null,score,1L);
+        customerInfoMapper.addAmount(user.getUserCode(),0.0,score,1L);
         Map<String,Object> resultMap=new HashMap<>();
         resultMap.put("data",score);
         resultMap.put("days",num);
+        return resultMap;
+    }
+
+    @Override
+    public Map<String,Object> isCustomerSignIn() {
+        UserInfo user = UserInterceptor.getUserInfo();
+        if (user== null) {
+            throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
+        }
+        PageHelper.startPage(1,1);
+        PageHelper.orderBy("id desc");
+        UserSignRecord signRecord=new UserSignRecord();
+        signRecord.setCustomerCode(user.getUserCode());
+        List<UserSignRecord> list=userSignRecordMapper.select(signRecord);
+
+
+        Map<String,Object> resultMap=new HashMap<>();
+        if (!CollectionUtils.isEmpty(list)){
+            //当天不可以签到
+            if (DateUtil.isSameDay(new Date(),list.get(0).getSignDate())){
+                resultMap.put("data","0");
+
+            }else {
+                resultMap.put("data","1");
+            }
+            if (DateUtil.betweenDay(new Date(),list.get(0).getSignDate(),false)<=1){
+                resultMap.put("days",list.get(0).getContinuousDay());
+            }else {
+                resultMap.put("days","0");
+            }
+            return resultMap;
+        }
+        resultMap.put("days",list.get(0).getContinuousDay());
+        resultMap.put("data","1");
         return resultMap;
     }
 }

@@ -10,4 +10,6 @@ import java.util.Map;
 public interface CustomerSignService {
 
     Map<String,Object> insertCustomerSignRecord();
+
+    Map<String,Object> isCustomerSignIn();
 }

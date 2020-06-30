@@ -412,4 +412,10 @@ public class CustomerHomeController {
     public ResponseEntity<Map<String,Object>> addCustomerSignIn(){
         return ResponseEntity.ok(signService.insertCustomerSignRecord());
     }
+
+    @ApiOperation("用户签到")
+    @GetMapping("/isCustomerSignIn")
+    public ResponseEntity<Map<String,Object>> isCustomerSignIn(){
+        return ResponseEntity.ok(signService.isCustomerSignIn());
+    }
 }
