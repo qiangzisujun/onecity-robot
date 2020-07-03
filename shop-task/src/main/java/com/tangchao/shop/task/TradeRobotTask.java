@@ -70,21 +70,21 @@ public class TradeRobotTask {
     /**
      * 模拟机器人购买 每分钟执行一次
      */
-    //@Scheduled(fixedDelay = 1000*10)
+    @Scheduled(fixedDelay = 1000*10)
     public void RobotBuyOrder() {
         this.robotMission("0");
     }
-    //@Scheduled(fixedDelay = 1000 * 10)
+    @Scheduled(fixedDelay = 1000 * 10)
     public void RobotBuyOrder2() {
         this.robotMission("2");
     }
-    //@Scheduled(fixedDelay = 1000 * 10)
+    @Scheduled(fixedDelay = 1000 * 10)
     public void RobotBuyOrder3() {
         this.robotMission("3");
     }
 
 
-    //@Scheduled(fixedDelay = 1000*60)
+    @Scheduled(fixedDelay = 1000*60)
     public void newSelectRobotList() {
 
         Calendar cal = Calendar.getInstance();

@@ -5,13 +5,13 @@ spring:
   datasource:
     druid:
       first:  #数据源1
-        url: jdbc:mysql://172.24.187.235:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://172.24.103.39:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: tangchao
-        password: tckj2020
+        password: Bany528528
       second:  #数据源2
-        url: jdbc:mysql://172.24.187.235:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://172.24.103.39:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: tangchao
-        password: tckj2020
+        password: Bany528528
       driverClassName: com.mysql.jdbc.Driver
       #最大活跃数
       maxActive: 20
@@ -34,7 +34,7 @@ spring:
       #配置监控统计拦截的filters，去掉后监控界面sql将无法统计,'wall'用于防火墙
       filters: stat, wall, log4j
   redis:
-    host: 172.24.187.235
+    host: 172.24.103.39
   jackson:
     #参数意义：
     #JsonInclude.Include.ALWAYS              默认
@@ -63,7 +63,7 @@ fdfs:
     width: 60
     height: 60
   tracker-list: # tracker地址
-    - 172.24.187.235:22122
+    - 172.24.103.39:22122
 tangchao:
   secret: ly@Login(Auth}*^31)&tangchao%f3q2 # 登录校验的密钥
   pubKeyPath: /data/jwt/rsa.pub # 公钥地址
