@@ -29,7 +29,7 @@ public class GoodsLockingTask {
     private ConfService confService;
 
     //每天零点执行
-    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron = "0 0 0 * * ?")
     public void deleteThreeDayFrontRecord(){
         System.out.print("========删除三天前商品锁单记录：");
         Integer num = this.lockingMapper.deleteThreeDayFrontRecord();
