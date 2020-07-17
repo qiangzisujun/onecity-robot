@@ -90,7 +90,7 @@ public enum ExceptionEnum {
     GOODS_NOT_EXIST(4079, "error_4079"),//优惠券不存在
     ACCOUNT_IS_BOUND(4080, "error_4080"),//账号已绑定了
     COLLECTION_NOT_FOND(4081, "error_4081"),//收款信息不存在
-    PHONE_VIRTUAL_ACCOUNT(4082, "error_4082");//收款信息不存在
+    PHONE_VIRTUAL_ACCOUNT(4082, "error_4082"),//收款信息不存在
     ;
     private int code;
     private String msg;
