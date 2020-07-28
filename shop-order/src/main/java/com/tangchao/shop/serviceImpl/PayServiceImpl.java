@@ -85,8 +85,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public Map<String,String> createBill(HttpServletRequest request, BigDecimal money,String notify) {
 
-        String contextPath = request.getServerName();
-        String baseUrl = "http://" + contextPath.trim();
+        String baseUrl = "http://www.onecityonline.com/";
 
         //  获取当前用户
         //获取用户登录
@@ -104,10 +103,10 @@ public class PayServiceImpl implements PayService {
 
         Base64.Encoder encoder = Base64.getEncoder();
         String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
-        // String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
+        //String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
 
         HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
-        // HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
+        //HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
         httppost.setHeader("Authorization", "Basic " + encoding);
         try {
             httppost.setEntity(new UrlEncodedFormEntity(getData(money, userInfo.getUserMobile(), baseUrl,notify)));
@@ -154,9 +153,9 @@ public class PayServiceImpl implements PayService {
         BigDecimal amount = money.multiply(new BigDecimal("100"));
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
-        // urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
+        //urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
         urlParameters.add(new BasicNameValuePair("description", "one city"));
-        // urlParameters.add(new BasicNameValuePair("email", "853029827@qq.com"));
+        urlParameters.add(new BasicNameValuePair("email", "onecityonline@hotmail.com"));
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
         urlParameters.add(new BasicNameValuePair("name", "Michael API V3"));
         urlParameters.add(new BasicNameValuePair("amount", amount.toString()));
@@ -169,7 +168,7 @@ public class PayServiceImpl implements PayService {
     public static Boolean check(WebhookParam webhookParam) {
         String data = webhookParam.toString();
         String key = "S-Ite9LKMFqC2IEk148hqsQg";
-        // String key = "S-caHZmB_KjGJRLsgJ4cHjCA";//沙盒环境
+        //String key = "S-caHZmB_KjGJRLsgJ4cHjCA";//沙盒环境
         try {
             String secret = HMACSHA256(data, key);
             log.warn("secret：" + secret);
@@ -211,11 +210,11 @@ public class PayServiceImpl implements PayService {
             platform.setPaymentOrderNo(webhookParam.getId());
             platform = paymentOrderPlatformMapper.selectOne(platform);
 
-            if (platform.getPaymentStatus().equals("1")) {
+            if (platform.getPaymentStatus().equals(1)) {
 
                 paymentOrderPlatformMapper.updatePlatformTradeNo(webhookParam.getId(), platform.getId());
 
-                ShopOrder shopOrder = shopOrderMapper.selectByPrimaryKey(request.getParameter("out_trade_no"));
+                ShopOrder shopOrder = shopOrderMapper.selectByPrimaryKey(platform.getOrderId());
                 Long payAmount = Long.valueOf(webhookParam.getAmount());
                 if (shopOrder != null && shopOrder.getTotalPay().equals(payAmount)) {
                     // TODO: 2020/1/17 给购物的商品添加销量
@@ -338,7 +337,7 @@ public class PayServiceImpl implements PayService {
                         log.info("==================================三级分佣开始===========");
                         this.threeLevelDistribution(shopOrder, customer.getInviteId(), remindSpec);
                     }
-                    log.warn(request.getParameter("out_trade_no") + "回调处理成功！");
+                    log.warn(webhookParam.getId() + "回调处理成功！");
 
                 } else {
                     log.error("数据已经处理过！无需重复处理！");

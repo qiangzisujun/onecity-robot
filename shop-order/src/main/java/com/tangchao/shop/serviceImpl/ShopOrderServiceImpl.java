@@ -1473,7 +1473,7 @@ public class ShopOrderServiceImpl implements ShopOrderService {
         pay.setPaymentType(1);//Billplz
 
         pay.setPlatformType("Billplz");
-        paymentOrderPlatformMapper.insertSelective(pay);
+
 
 
         // TODO: 2020.2.21 抵用消费券
@@ -1525,20 +1525,24 @@ public class ShopOrderServiceImpl implements ShopOrderService {
                 throw new CustomerException(ExceptionEnum.USER_ACCOUNT_SETTINGS);
 
             String contextPath = request.getServerName();
-            String baseUrl = "http://" + contextPath.trim();
+            String baseUrl ="http://" + contextPath.trim();
             Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
             pay.setPaymentMoney(money.doubleValue());
             pay.setPaymentOrderNo(map.get("orderId"));
+            pay.setOrderId(shopOrder.getOrderId());
+            paymentOrderPlatformMapper.insertSelective(pay);
             return map;
         }
         BigDecimal totalPay = new BigDecimal(String.valueOf(shopOrder.getTotalPay()));
         BigDecimal divide = totalPay.divide(new BigDecimal("100"));
 
         String contextPath = request.getServerName();
-        String baseUrl = "http://" + contextPath.trim();
+        String baseUrl ="http://" + contextPath.trim();
         Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
         pay.setPaymentMoney(divide.doubleValue());
         pay.setPaymentOrderNo(map.get("orderId"));
+        pay.setOrderId(shopOrder.getOrderId());
+        paymentOrderPlatformMapper.insertSelective(pay);
         return map;
     }
 

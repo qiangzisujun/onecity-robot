@@ -25,4 +25,6 @@ public class PaymentOrderPlatform {
     private String platformTradeNo;//平台交易订单号
     private String platformType;//平台类型
 
+    private String orderId;//
+
 }
