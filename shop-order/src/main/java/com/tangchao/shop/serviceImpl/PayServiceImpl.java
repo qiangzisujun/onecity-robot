@@ -102,11 +102,11 @@ public class PayServiceImpl implements PayService {
         HttpClient httpclient = HttpClientBuilder.create().build();
 
         Base64.Encoder encoder = Base64.getEncoder();
-        String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
-        //String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
+        //String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
+        String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
 
-        HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
-        //HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
+        //HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
+        HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
         httppost.setHeader("Authorization", "Basic " + encoding);
         try {
             httppost.setEntity(new UrlEncodedFormEntity(getData(money, userInfo.getUserMobile(), baseUrl,notify)));
@@ -152,8 +152,8 @@ public class PayServiceImpl implements PayService {
     public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl,String notify) {
         BigDecimal amount = money.multiply(new BigDecimal("100"));
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
-        //urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
+        //urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
+        urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
         urlParameters.add(new BasicNameValuePair("description", "one city"));
         urlParameters.add(new BasicNameValuePair("email", "onecityonline@hotmail.com"));
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
@@ -167,8 +167,8 @@ public class PayServiceImpl implements PayService {
 
     public static Boolean check(WebhookParam webhookParam) {
         String data = webhookParam.toString();
-        String key = "S-Ite9LKMFqC2IEk148hqsQg";
-        //String key = "S-caHZmB_KjGJRLsgJ4cHjCA";//沙盒环境
+        //String key = "S-Ite9LKMFqC2IEk148hqsQg";
+        String key = "S-caHZmB_KjGJRLsgJ4cHjCA";//沙盒环境
         try {
             String secret = HMACSHA256(data, key);
             log.warn("secret：" + secret);

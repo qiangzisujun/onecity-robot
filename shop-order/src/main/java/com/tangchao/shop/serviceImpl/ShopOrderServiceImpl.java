@@ -1525,7 +1525,8 @@ public class ShopOrderServiceImpl implements ShopOrderService {
                 throw new CustomerException(ExceptionEnum.USER_ACCOUNT_SETTINGS);
 
             String contextPath = request.getServerName();
-            String baseUrl ="http://" + contextPath.trim();
+            //String baseUrl ="http://" + contextPath.trim();
+            String baseUrl="http://3082pj8199.wicp.vip/";
             Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
             pay.setPaymentMoney(money.doubleValue());
             pay.setPaymentOrderNo(map.get("orderId"));
@@ -1537,7 +1538,8 @@ public class ShopOrderServiceImpl implements ShopOrderService {
         BigDecimal divide = totalPay.divide(new BigDecimal("100"));
 
         String contextPath = request.getServerName();
-        String baseUrl ="http://" + contextPath.trim();
+        //String baseUrl ="http://" + contextPath.trim();
+        String baseUrl="http://3082pj8199.wicp.vip/";
         Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
         pay.setPaymentMoney(divide.doubleValue());
         pay.setPaymentOrderNo(map.get("orderId"));
@@ -1564,7 +1566,8 @@ public class ShopOrderServiceImpl implements ShopOrderService {
         BigDecimal totalPay = new BigDecimal(String.valueOf(order.getTotalPay()));
         BigDecimal divide = totalPay.divide(new BigDecimal("100"));
         String contextPath = request.getServerName();
-        String baseUrl = "http://" + contextPath.trim();
+        //String baseUrl = "http://" + contextPath.trim();
+        String baseUrl="http://3082pj8199.wicp.vip/";
         Map<String,String> map=payService.createBill(request,divide,baseUrl+"/api/pay/billplz/webhook");
         return map;
 
