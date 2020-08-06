@@ -81,6 +81,9 @@ public class PayServiceImpl implements PayService {
     @Autowired
     private PaymentOrderPlatformMapper paymentOrderPlatformMapper;
 
+    @Autowired
+    private UserConfMapper userConfMapper;
+
 
     @Override
     public Map<String,String> createBill(HttpServletRequest request, BigDecimal money,String notify) {
@@ -102,11 +105,11 @@ public class PayServiceImpl implements PayService {
         HttpClient httpclient = HttpClientBuilder.create().build();
 
         Base64.Encoder encoder = Base64.getEncoder();
-        //String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
-        String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
+        String encoding = encoder.encodeToString(("fc821d48-5f13-4929-97c2-31c57fd33f4f:").getBytes());
+        //String encoding = encoder.encodeToString(("cdc4f58c-1a46-433c-ac9f-eb2de906c171:").getBytes());// 沙盒环境
 
-        //HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
-        HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
+        HttpPost httppost = new HttpPost("https://www.billplz.com/api/v3/bills");
+        //HttpPost httppost = new HttpPost("https://www.billplz-sandbox.com/api/v3/bills"); // 沙盒环境
         httppost.setHeader("Authorization", "Basic " + encoding);
         try {
             httppost.setEntity(new UrlEncodedFormEntity(getData(money, userInfo.getUserMobile(), baseUrl,notify)));
@@ -152,8 +155,8 @@ public class PayServiceImpl implements PayService {
     public static List<NameValuePair> getData(BigDecimal money, String mobile, String baseUrl,String notify) {
         BigDecimal amount = money.multiply(new BigDecimal("100"));
         List<NameValuePair> urlParameters = new ArrayList<>();
-        //urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
-        urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
+        urlParameters.add(new BasicNameValuePair("collection_id", "utogvfxv"));
+        //urlParameters.add(new BasicNameValuePair("collection_id", "v3qcsqjm"));//沙盒环境
         urlParameters.add(new BasicNameValuePair("description", "one city"));
         urlParameters.add(new BasicNameValuePair("email", "onecityonline@hotmail.com"));
         urlParameters.add(new BasicNameValuePair("mobile", mobile));
@@ -167,8 +170,8 @@ public class PayServiceImpl implements PayService {
 
     public static Boolean check(WebhookParam webhookParam) {
         String data = webhookParam.toString();
-        //String key = "S-Ite9LKMFqC2IEk148hqsQg";
-        String key = "S-caHZmB_KjGJRLsgJ4cHjCA";//沙盒环境
+        String key = "S-Ite9LKMFqC2IEk148hqsQg";
+        //String key = "S-caHZmB_KjGJRLsgJ4cHjCA";//沙盒环境
         try {
             String secret = HMACSHA256(data, key);
             log.warn("secret：" + secret);
@@ -223,8 +226,7 @@ public class PayServiceImpl implements PayService {
                     criteria.andEqualTo("orderId", shopOrder.getOrderId());
                     List<ShopOrderDetail> shopOrderDetails = detailMapper.selectByExample(example);
 
-                    //商品分销提点
-                    Double remindSpec = 0.0;
+
                     Integer goodsType = 0;
                     for (ShopOrderDetail shopOrderDetail : shopOrderDetails) {
                         Long goodsId = shopOrderDetail.getGoodsId();
@@ -234,7 +236,6 @@ public class PayServiceImpl implements PayService {
                         shopGoods.setSalesVolume(total);
                         goodsMapper.updateByPrimaryKeySelective(shopGoods);
                         //只有一条记录时可以使用
-                        remindSpec = shopGoods.getCommission().doubleValue();
                         if (shopGoods.getGoodsTypeId().equals(1)) {//购买特定商品充值20元话费
                             customerService.mobileRecharge(shopOrder.getUserCode(), 20);
                             //查询上级给上级赠送抽奖机会
@@ -335,7 +336,7 @@ public class PayServiceImpl implements PayService {
                     customer = customerMapper.selectOne(customer);
                     if (!goodsType.equals(1)) {
                         log.info("==================================三级分佣开始===========");
-                        this.threeLevelDistribution(shopOrder, customer.getInviteId(), remindSpec);
+                        this.threeLevelDistribution(shopOrder, customer.getInviteId());
                     }
                     log.warn(webhookParam.getId() + "回调处理成功！");
 
@@ -419,7 +420,7 @@ public class PayServiceImpl implements PayService {
         }
     }
 
-    private void threeLevelDistribution(ShopOrder order, String inviteId,Double remindSpec){
+    private void threeLevelDistribution(ShopOrder order, String inviteId){
 
         BigDecimal totalMoney=new BigDecimal(order.getActualPay());
 
@@ -433,21 +434,26 @@ public class PayServiceImpl implements PayService {
         distribution.setPurchaserCode(Long.valueOf(order.getUserCode())); //  订单消费者编号
         distribution.setCreateTime(new Date());                 //  创建时间
         //  创建分销提点
-        this.createDistribution(distribution,inviteId,remindSpec);
+        this.createDistribution(distribution,inviteId);
     }
 
-    private void createDistribution(OrderDistribution distribution,String beneficiaryCode,Double remindSpec) {
+    private void createDistribution(OrderDistribution distribution,String beneficiaryCode) {
         //  判断有收益人
         if (null == beneficiaryCode) {
             return;
         }
-        if (null == remindSpec || remindSpec == 0) {
+        int layer = distribution.getRemindLayer();
+        String confKey = ConfigkeyConstant.MALL_ORDER_DISTRIBUTION_REMIND + layer;
+        UserConf conf=new UserConf();
+        conf.setConfKey(confKey);
+        conf.setFlag(0);
+        conf = userConfMapper.selectOne(conf);
+        if (null == conf|| StringUtils.isEmpty(conf.getConfValue())){
             return;
         }
-
         try {
             //  获取提点比例
-            //Double remindSpec = Double.parseDouble(conf.getConfValue());
+            Double remindSpec = Double.parseDouble(conf.getConfValue());
             distribution.setRemindSpec(remindSpec);
             //  计算提点金额
             Double remindMoney = ArithUtil.mul(remindSpec, distribution.getOrderTotal());
@@ -468,9 +474,23 @@ public class PayServiceImpl implements PayService {
             double userMoney = ArithUtil.add(customerInfo.getEmployMoney(), remindMoney);
             customerInfo.setEmployMoney(userMoney);
             this.customerInfoMapper.updateByPrimaryKeySelective(customerInfo);
+            //  创建下一级分销记录
+            layer++;
+            //  判断层级
+            if (layer > 3){
+                return;
+            }
+            distribution.setRemindLayer(layer);
 
+            Customer customer=new Customer();
+            customer.setUserCode(customerInfo.getCustomerCode());
+            List<Customer> customerInfoList = customerMapper.select(customer);
+            if(customerInfoList.isEmpty()) {
+                return;
+            }
+            customer=customerInfoList.get(0);
+            this.createDistribution(distribution,customer.getInviteId() == null ? null : customer.getInviteId());
         } catch (NumberFormatException e) {
-            //this.logger.error("配置：\"" + confKey + "\" 的值是个字符串");
             this.log.error(e.getMessage());
         }
     }
