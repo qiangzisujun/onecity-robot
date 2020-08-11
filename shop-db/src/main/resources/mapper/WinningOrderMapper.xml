@@ -147,7 +147,7 @@
              1=1 and w.is_robot=0
             <!-- 根据商品编号查询 -->
             <if test="goodsNo !=null and goodsNo != ''">
-                w.goods_no like CONCAT("%",#{goodsNo},"%")
+                and w.goods_no like CONCAT("%",#{goodsNo},"%")
             </if>
             <!-- 订单编码 -->
             <if test="orderNo !=null and orderNo != ''">

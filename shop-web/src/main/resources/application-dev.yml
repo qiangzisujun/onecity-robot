@@ -5,13 +5,13 @@ spring:
   datasource:
     druid:
       first:  #数据源1
-        url: jdbc:mysql://172.16.8.186:3306/malai?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://47.254.237.100:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
         username: tangchao
-        password: 123456
+        password: Bany528528
       second:  #数据源2
-        url: jdbc:mysql://172.16.8.186:3306/malai?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-        username: root
-        password: 123456
+        url: jdbc:mysql://47.254.237.100:3306/onerm_prod?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+        username: tangchao
+        password: Bany528528
       #最大活跃数
       maxActive: 20
       #初始化数量
@@ -33,7 +33,7 @@ spring:
       #配置监控统计拦截的filters，去掉后监控界面sql将无法统计,'wall'用于防火墙
       filters: stat, wall, log4j
   redis:
-    host: 172.16.8.246
+    host: 172.16.8.70
     password: 123456
   jackson:
     #参数意义：

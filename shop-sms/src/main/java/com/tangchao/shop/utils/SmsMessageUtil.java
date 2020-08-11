@@ -40,7 +40,7 @@ public class SmsMessageUtil {
             // String dstno = "60102213291"; /*You are going compose a message to this destination number._您将向该目的地号码撰写一条消息。*/
             // String str = "testing using normal!no.3"; /*Your message over here_您在这里留言*/
             String msg = message.replace(" ", "%20");//空格转义
-            int type = 1; /*for unicode change to 2, normal will the 1._对于unicode更改为2，正常将1。*/
+            int type = 2; /*for unicode change to 2, normal will the 1._对于unicode更改为2，正常将1。*/
             String sendid = "isms"; /*Malaysia does not support sender id yet._马来西亚尚不支持发件人ID*/
             String[] urlList = {"https://www.isms.com.my/isms_send.php", "https://ww2.isms.com.my/isms_send.php", "https://www.vocotext.com/isms_send.php"};/* Send data*/
 
