@@ -191,14 +191,14 @@ public class OpenWinningTask {
     public void openWinning() throws Exception {
 
         // 修复库存
-        //int count=goodsStageMapper.repairGoodsInv();
-        int count=0;
-//        Integer openTime = this.openWinningService.findOpenWinningTime();
-//        try {
-//            TimeUnit.SECONDS.sleep(openTime - 3);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        int count=goodsStageMapper.repairGoodsInv();
+
+        Integer openTime = this.openWinningService.findOpenWinningTime();
+        try {
+            TimeUnit.SECONDS.sleep(openTime - 3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // 获取待开奖的商品列表
         List<GoodsStage> goodsStageList = this.openWinningService.findWaitOpenWinning(null);
