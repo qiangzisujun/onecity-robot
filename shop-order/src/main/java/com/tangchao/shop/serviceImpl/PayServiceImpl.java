@@ -206,7 +206,7 @@ public class PayServiceImpl implements PayService {
     public void webhook(WebhookParam webhookParam,HttpServletRequest request) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         log.warn("________________________" + LocalDateTime.now().toString() + "________________________");
         Boolean check = check(webhookParam);
-        if (check) {
+        if (check&&webhookParam.getPaid().equals("true")) {
             log.error("数据一致");
             log.error(webhookParam.toString());
             PaymentOrderPlatform platform = new PaymentOrderPlatform();

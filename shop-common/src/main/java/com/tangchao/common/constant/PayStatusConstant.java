@@ -77,4 +77,10 @@ public abstract class PayStatusConstant {
      */
     public static final Integer PAY_FROM_BACK_9MAO = 10;
 
+
+    /**
+     * 后台充值赠送
+     */
+    public static final Integer PAY_ADMIN_HANDSELMONEY = 11;
+
 }

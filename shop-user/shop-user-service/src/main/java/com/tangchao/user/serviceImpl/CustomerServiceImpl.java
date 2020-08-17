@@ -1313,6 +1313,7 @@ public class CustomerServiceImpl implements CustomerService {
         double userMoney=Double.valueOf(data.get("money").toString());//充值金额
         Double userScore=Double.valueOf(data.get("integral").toString());//积分
         Integer type=Integer.valueOf(data.get("type").toString());//
+        Integer handselMoney=Integer.valueOf(data.get("handselMoney").toString());//
 
         try {
             Customer customer = selectCustomerInfoByPhone(mobile,1);
@@ -1361,6 +1362,22 @@ public class CustomerServiceImpl implements CustomerService {
                     customerInfo.setRegisterScore(0.0);
                     customerInfoMapper.updateByPrimaryKeySelective(customerInfo);// 清空这个注册送的福分
                 }
+
+                //后台赠送抽奖次数
+                if(handselMoney>0){
+                    userMoney=userMoney+handselMoney;
+
+                    CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
+                    customerRechargeRecord.setAmount(userMoney);
+                    customerRechargeRecord.setCreateId(userId);
+                    customerRechargeRecord.setCustomerCode(customer.getUserCode());
+                    customerRechargeRecord.setIntegral(userScore);
+                    customerRechargeRecord.setType(1);
+                    customerRechargeRecord.setPayment(PayStatusConstant.PAY_ADMIN_HANDSELMONEY);//后台赠送
+                    customerRechargeRecord.setCreateTime(new Date());
+                    int rowResult = this.customerRechargeRecordMapper.insertSelective(customerRechargeRecord);
+                }
+
                 int rowCount = customerInfoMapper.addAmount(customer.getUserCode(), userMoney, userScore, userId);
                 if (rowCount > 0) {
                     CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
@@ -1376,6 +1393,7 @@ public class CustomerServiceImpl implements CustomerService {
                         throw new CustomerException(ExceptionEnum.OPERATING_FAIL);
                     }
                 }
+
             }else if (type==2){//扣减
                 logger.info("进入扣减:登录账号Id"+userId+"登录ip"+IPAddressUtil.getClientIpAddress(request)+"充值手机号:"+mobile+"充值金额:userMoney","充值积分:"+type);
                 int count=this.customerMinus(customer.getUserCode(),userMoney,userScore,userId,2,null);
