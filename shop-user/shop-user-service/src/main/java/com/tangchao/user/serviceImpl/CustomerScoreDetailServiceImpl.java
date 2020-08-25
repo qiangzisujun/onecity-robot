@@ -172,31 +172,21 @@ public class CustomerScoreDetailServiceImpl implements CustomerScoreDetailServic
     public Double interMoneyDetail(String confKey, CustomerScoreDetail detail) {
 
         double money = 0;
-
-        double score = 0;
-        UserConf conf=new UserConf();
-        conf.setConfKey(ConfigkeyConstant.CN_SWITCH_US);
-        conf.setFlag(0);
-        List<UserConf> scoreConf = userConfMapper.select(conf);
-        conf=scoreConf.get(0);
-
         UserConf registerMoney=new UserConf();
         registerMoney.setConfKey(confKey);
         registerMoney.setFlag(0);
         List<UserConf> scoreList = userConfMapper.select(registerMoney);
 
-        if (null != scoreConf) {
-            registerMoney=scoreList.get(0);
-            try {
-                if (null != registerMoney){
-                    // 获取余额
-                    money = Double.parseDouble(registerMoney.getConfValue());
-                }
-            } catch (NumberFormatException e) {
-                // 积分配置值格式不正确
-                this.logger.error("配置：\"" + confKey + "\" 的值是个字符串");
-                this.logger.error(e.getMessage());
+        registerMoney=scoreList.get(0);
+        try {
+            if (null != registerMoney){
+                // 获取余额
+                money = Double.parseDouble(registerMoney.getConfValue());
             }
+        } catch (NumberFormatException e) {
+            // 积分配置值格式不正确
+            this.logger.error("配置：\"" + confKey + "\" 的值是个字符串");
+            this.logger.error(e.getMessage());
         }
         return money;
     }

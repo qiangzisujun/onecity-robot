@@ -3,12 +3,14 @@ package com.tangchao.shop.serviceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tangchao.common.constant.ConfigkeyConstant;
+import com.tangchao.common.constant.OrderConstant;
 import com.tangchao.common.enums.ExceptionEnum;
 import com.tangchao.common.exception.CustomerException;
 import com.tangchao.common.vo.PageResult;
 import com.tangchao.shop.interceptor.UserInterceptor;
 import com.tangchao.shop.mapper.GoodsStageMapper;
 import com.tangchao.shop.mapper.ShoppingCartMapper;
+import com.tangchao.shop.mapper.TradeOrderMapper;
 import com.tangchao.shop.mapper.UserConfMapper;
 import com.tangchao.shop.pojo.*;
 import com.tangchao.shop.service.ShoppingCartService;
@@ -36,6 +38,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Autowired
     private UserConfMapper userConfMapper;
+
+    @Autowired
+    private TradeOrderMapper tradeOrderMapper;
 
     @Override
     public void addCart(Long stageId,Integer num) {
@@ -197,6 +202,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         if (user== null) {
             throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
         }
+        int count=tradeOrderMapper.updateUserOrderStatusByOverTime(user.getUserCode(), OrderConstant.UNPAID, OrderConstant.TIME_OUT);
+
         PageHelper.startPage(pageNo, pageSize, true);
         ShoppingCart cartInfo = new ShoppingCart();
         cartInfo.setCustomerCode(user.getUserCode());
@@ -210,7 +217,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             if (goodsStage.getGoodsInv() <= 0){
                 // 当前购物车商品最大期数
                 cart.setStageId(goodsStage.getMaxStageIndex().longValue());
-                int count=cartMapper.updateByPrimaryKey(cart);
+                count=cartMapper.updateByPrimaryKey(cart);
                 continue;
             }
 

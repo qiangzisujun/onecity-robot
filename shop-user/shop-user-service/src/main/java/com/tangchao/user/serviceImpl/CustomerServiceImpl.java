@@ -1315,6 +1315,10 @@ public class CustomerServiceImpl implements CustomerService {
         Integer type=Integer.valueOf(data.get("type").toString());//
         Integer handselMoney=Integer.valueOf(data.get("handselMoney").toString());//
 
+        if (userScore==null){
+            throw new CustomerException(ExceptionEnum.INVALID_CART_DATA_TYPE);
+        }
+
         try {
             Customer customer = selectCustomerInfoByPhone(mobile,1);
             if (customer == null) {
@@ -1393,7 +1397,7 @@ public class CustomerServiceImpl implements CustomerService {
                         throw new CustomerException(ExceptionEnum.OPERATING_FAIL);
                     }
                 }
-
+                this.threeLevelDistribution(userMoney, customer.getInviteId(),customer.getUserCode());
             }else if (type==2){//扣减
                 logger.info("进入扣减:登录账号Id"+userId+"登录ip"+IPAddressUtil.getClientIpAddress(request)+"充值手机号:"+mobile+"充值金额:userMoney","充值积分:"+type);
                 int count=this.customerMinus(customer.getUserCode(),userMoney,userScore,userId,2,null);
@@ -2653,5 +2657,80 @@ public class CustomerServiceImpl implements CustomerService {
             return 1;
         }
         return 0;
+    }
+
+
+    /**
+     * 三级分销
+     * @param inviteId
+     */
+    private void threeLevelDistribution(Double actualPay, String inviteId,Long userCode){
+
+        OrderDistribution distribution = new OrderDistribution();
+        distribution.setOrderNo("后台充值分销");            //  订单编号
+        distribution.setOrderTotal(actualPay); //  订单总额（扣除最小支付金额）
+        distribution.setRemindLayer(1);                         //  提点层级
+        distribution.setPurchaserCode(userCode); //  订单消费者编号
+        distribution.setCreateTime(new Date());                 //  创建时间
+        //  创建分销提点
+        this.createDistribution(distribution,inviteId);
+    }
+
+    private void createDistribution(OrderDistribution distribution,String beneficiaryCode) {
+        //  判断有收益人
+        if (null == beneficiaryCode) {
+            return;
+        }
+        int layer = distribution.getRemindLayer();
+        String confKey = ConfigkeyConstant.MALL_ORDER_DISTRIBUTION_REMIND + layer;
+        UserConf conf=new UserConf();
+        conf.setConfKey(confKey);
+        conf.setFlag(0);
+        conf = userConfMapper.selectOne(conf);
+        if (null == conf|| StringUtils.isEmpty(conf.getConfValue())){
+            return;
+        }
+        try {
+            //  获取提点比例
+            Double remindSpec = Double.parseDouble(conf.getConfValue());
+            distribution.setRemindSpec(remindSpec);
+            //  计算提点金额
+            Double remindMoney = ArithUtil.mul(remindSpec, distribution.getOrderTotal());
+            distribution.setRemindMoney(remindMoney);
+            //  获取收益人信息
+            CustomerInfo customerInfo = new CustomerInfo();
+            customerInfo.setInviteCode(beneficiaryCode);
+            List<CustomerInfo> customerList = customerInfoMapper.select(customerInfo);
+            if (customerList.isEmpty()) {
+                return;
+            }
+            customerInfo = customerList.get(0);//chang
+            distribution.setBeneficiaryCode(customerInfo.getCustomerCode());
+            distribution.setId(null);
+            //  保存提点记录
+            this.orderDistributionMapper.insertSelective(distribution);
+            //  更新收益人佣金余额
+            double userMoney = ArithUtil.add(customerInfo.getEmployMoney(), remindMoney);
+            customerInfo.setEmployMoney(userMoney);
+            this.customerInfoMapper.updateByPrimaryKeySelective(customerInfo);
+            //  创建下一级分销记录
+            layer++;
+            //  判断层级
+            if (layer > 3){
+                return;
+            }
+            distribution.setRemindLayer(layer);
+
+            Customer customer=new Customer();
+            customer.setUserCode(customerInfo.getCustomerCode());
+            List<Customer> customerInfoList = customerMapper.select(customer);
+            if(customerInfoList.isEmpty()) {
+                return;
+            }
+            customer=customerInfoList.get(0);
+            this.createDistribution(distribution,customer.getInviteId() == null ? null : customer.getInviteId());
+        } catch (NumberFormatException e) {
+            this.logger.error(e.getMessage());
+        }
     }
 }
