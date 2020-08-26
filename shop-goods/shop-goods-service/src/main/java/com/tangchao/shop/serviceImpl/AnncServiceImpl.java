@@ -64,12 +64,12 @@ public class AnncServiceImpl implements AnncService {
         Example example = new Example(Annc.class);
         Example.Criteria criteria = example.createCriteria();
         // 设置查询条件
-        //criteria.andEqualTo("flag", 0);
-        criteria.andEqualTo("isShow", 1);
+        criteria.andEqualTo("flag", 0);
+        //criteria.andEqualTo("isShow", 1);
         /*if (createTime != null) {
             criteria.andLessThan("createTime", createTime);
         }*/
         PageHelper.orderBy("create_time desc");
-        return this.anncMapper.selectAll();
+        return this.anncMapper.selectByExample(example);
     }
 }

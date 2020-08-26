@@ -1313,7 +1313,7 @@ public class CustomerServiceImpl implements CustomerService {
         double userMoney=Double.valueOf(data.get("money").toString());//充值金额
         Double userScore=Double.valueOf(data.get("integral").toString());//积分
         Integer type=Integer.valueOf(data.get("type").toString());//
-        Integer handselMoney=Integer.valueOf(data.get("handselMoney").toString());//
+        Double handselMoney=Double.valueOf(data.get("handselMoney").toString());//
 
         if (userScore==null){
             throw new CustomerException(ExceptionEnum.INVALID_CART_DATA_TYPE);
@@ -1369,10 +1369,9 @@ public class CustomerServiceImpl implements CustomerService {
 
                 //后台赠送抽奖次数
                 if(handselMoney>0){
-                    userMoney=userMoney+handselMoney;
 
                     CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
-                    customerRechargeRecord.setAmount(userMoney);
+                    customerRechargeRecord.setAmount(handselMoney);
                     customerRechargeRecord.setCreateId(userId);
                     customerRechargeRecord.setCustomerCode(customer.getUserCode());
                     customerRechargeRecord.setIntegral(userScore);
@@ -1397,7 +1396,7 @@ public class CustomerServiceImpl implements CustomerService {
                         throw new CustomerException(ExceptionEnum.OPERATING_FAIL);
                     }
                 }
-                this.threeLevelDistribution(userMoney, customer.getInviteId(),customer.getUserCode());
+                this.threeLevelDistribution(userMoney+handselMoney, customer.getInviteId(),customer.getUserCode());
             }else if (type==2){//扣减
                 logger.info("进入扣减:登录账号Id"+userId+"登录ip"+IPAddressUtil.getClientIpAddress(request)+"充值手机号:"+mobile+"充值金额:userMoney","充值积分:"+type);
                 int count=this.customerMinus(customer.getUserCode(),userMoney,userScore,userId,2,null);

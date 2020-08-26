@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://47.254.237.100:3306/onerm_dev?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: tangchao
-    password: Bany528528
+    url: jdbc:mysql://172.16.8.95:3306/malai?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
     driverClassName: com.mysql.cj.jdbc.Driver
   redis:
     host: 127.0.0.1
