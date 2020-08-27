@@ -367,7 +367,13 @@ public class OrderServiceImpl implements OrderService {
             updateCustomer.setUserFlow(0.0);
             updateCustomer.setCustomerCode(customer.getUserCode());
             updateCustomer.setUserMoney(customerInfo.getUserMoney()-orderTotal);
-            updateCustomer.setUserScore(score+customerInfo.getUserScore());
+
+            if (null!=customerInfo.getUserScore()){
+                updateCustomer.setUserScore(score+customerInfo.getUserScore());
+            }else{
+                updateCustomer.setUserScore(score);
+            }
+
             count=customerService.updateCustomerInfo(updateCustomer);
             if (count!=1) {
                 throw new CustomerException(ExceptionEnum.ORDER_PAYMENT_ERROR);
