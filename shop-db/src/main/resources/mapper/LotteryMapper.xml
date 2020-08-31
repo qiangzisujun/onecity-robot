@@ -101,6 +101,18 @@
         and c.flag = 0 and c.black_statu = 0
     </select>
 
+
+    <!-- 获取全部用户 -->
+    <select id="selectAllLottery" resultType="com.tangchao.shop.pojo.Lottery">
+        SELECT l.id,l.order_goods_id as orderGoodsId,l.goods_no as goodsNo,l.stage_id as stageId,l.goods_stage as goodsStage,
+        l.lottery_code as lotteryCode,l.customer_code as customerCode,l.lottery_code as lotteryCode,l.create_time as createTime,
+        l.is_robot as isRobot,l.open_winning_time as openWinningTime,l.is_winning as isWinning,l.result_code as resultCode,
+        l.result_user_code as resultUserCode,l.pay_ip FROM lottery l
+        left join customer c on c.user_code = l.customer_code
+        where l.goods_no=#{goodsNo} and l.stage_id=#{stageId}
+        and c.flag = 0
+    </select>
+
     <!-- 获取白名单用户 不包括机器人 -->
     <select id="selectOneUserByWhitelist" resultType="com.tangchao.shop.pojo.Lottery">
         SELECT l.id,l.order_goods_id as orderGoodsId,l.goods_no as goodsNo,l.stage_id as stageId,l.goods_stage as goodsStage,

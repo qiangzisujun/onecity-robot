@@ -1272,13 +1272,13 @@ public class CustomerServiceImpl implements CustomerService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("userMobile", phone);
 
-        if (type==1){
-            criteria.andEqualTo("isSupplier", 0);
-        }else if (type==1){
-            criteria.andEqualTo("isSupplier", 0);
-        }else{
-            throw new CustomerException(ExceptionEnum.INVALID_CART_DATA_TYPE);
-        }
+//        if (type==1){
+//            criteria.andEqualTo("isSupplier", 0);
+//        }else if (type==1){
+//            criteria.andEqualTo("isSupplier", 0);
+//        }else{
+//            throw new CustomerException(ExceptionEnum.INVALID_CART_DATA_TYPE);
+//        }
         criteria.andNotEqualTo("flag", -1);
         Customer customer = this.findOnlyOneByExample(example);
         if (customer==null){
@@ -1381,7 +1381,7 @@ public class CustomerServiceImpl implements CustomerService {
                     int rowResult = this.customerRechargeRecordMapper.insertSelective(customerRechargeRecord);
                 }
 
-                int rowCount = customerInfoMapper.addAmount(customer.getUserCode(), userMoney, userScore, userId);
+                int rowCount = customerInfoMapper.addAmount(customer.getUserCode(), userMoney+handselMoney, userScore, userId);
                 if (rowCount > 0) {
                     CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
                     customerRechargeRecord.setAmount(userMoney);
@@ -1480,8 +1480,11 @@ public class CustomerServiceImpl implements CustomerService {
         if (userId == null){
             throw new CustomerException(ExceptionEnum.USER_NOT_AUTHORIZED);
         }
+
         String customerCode=data.get("customerCode").toString();//用户标识
         double userMoney=Double.valueOf(data.get("money").toString());//充值金额
+        Double handselMoney=Double.valueOf(data.get("handselMoney").toString());//
+
         try {
             Customer customer = new Customer();
             customer.setFlag(0);
@@ -1491,7 +1494,22 @@ public class CustomerServiceImpl implements CustomerService {
             if (customer == null) {
                 throw new CustomerException(ExceptionEnum.INVALID_USER_NOT_FOND);
             }
-            int rowCount = customerInfoMapper.addAmount(Long.valueOf(customerCode), userMoney,null, userId);
+
+            //后台赠送抽奖次数
+            if(handselMoney>0){
+
+                CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
+                customerRechargeRecord.setAmount(handselMoney);
+                customerRechargeRecord.setCreateId(userId);
+                customerRechargeRecord.setCustomerCode(customer.getUserCode());
+                customerRechargeRecord.setIntegral(0.00);
+                customerRechargeRecord.setType(1);
+                customerRechargeRecord.setPayment(PayStatusConstant.PAY_ADMIN_HANDSELMONEY);//后台赠送
+                customerRechargeRecord.setCreateTime(new Date());
+                int rowResult = this.customerRechargeRecordMapper.insertSelective(customerRechargeRecord);
+            }
+
+            int rowCount = customerInfoMapper.addAmount(Long.valueOf(customerCode), userMoney+handselMoney,null, userId);
             if (rowCount > 0) {
                 CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
                 customerRechargeRecord.setCustomerCode(Long.valueOf(customerCode));

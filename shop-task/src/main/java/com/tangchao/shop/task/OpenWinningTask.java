@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -124,7 +125,12 @@ public class OpenWinningTask {
 
             // 获取购买该商品的所有白名单用户彩票列表 包括机器人
             List<Lottery> baiLotteryList = lotteryMapper.selectOneUserByNotBlackList(Long.valueOf(stage.getGoodsNo()),stage.getId());
-            return this.randomResultByLotteryList(baiLotteryList);
+            if (CollectionUtils.isEmpty(baiLotteryList)){
+                List<Lottery> allLotteryList = lotteryMapper.selectAllLottery(Long.valueOf(stage.getGoodsNo()),stage.getId());
+                return this.randomResultByLotteryList(allLotteryList);
+            }else {
+                return this.randomResultByLotteryList(baiLotteryList);
+            }
         }
         String resultStr = result.toString();
         return resultStr;

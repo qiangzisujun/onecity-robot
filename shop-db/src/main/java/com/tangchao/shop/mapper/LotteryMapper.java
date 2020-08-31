@@ -57,6 +57,15 @@ public interface LotteryMapper extends Mapper<Lottery> {
                                         @Param(value = "stageId") Long stageId);
 
     /**
+     * 获取全部参与用户
+     * @param goodsNo
+     * @param stageId
+     * @return
+     */
+    List<Lottery> selectAllLottery(@Param(value = "goodsNo") Long goodsNo,
+                                   @Param(value = "stageId") Long stageId);
+
+    /**
      * 获取白名单用户 不包括机器人
      * @return
      */

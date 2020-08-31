@@ -69,7 +69,7 @@ tangchao:
   pubKeyPath: /data/jwt/rsa.pub # 公钥地址
   priKeyPath: /data/jwt/rsa.pri # 私钥地址
   upload:
-    baseUrl: http://www.onecityonline.com/
+    baseUrl: https://www.onecityonline.com/
     allowTypes:
       - image/jpeg
       - image/png
