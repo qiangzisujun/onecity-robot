@@ -88,7 +88,7 @@ public class PayServiceImpl implements PayService {
     @Override
     public Map<String,String> createBill(HttpServletRequest request, BigDecimal money,String notify) {
 
-        String baseUrl = "http://www.onecityonline.com/";
+        String baseUrl = "https://www.onecityonline.com/";
 
         //  获取当前用户
         //获取用户登录
