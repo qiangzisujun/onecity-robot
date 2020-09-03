@@ -334,7 +334,7 @@ public class CustomerScoreDetailServiceImpl implements CustomerScoreDetailServic
                 if (count!=1){
                     throw new CustomerException(ExceptionEnum.RECHARGE_SAVE_ERROR);
                 }
-                int i = customerInfoMapper.addAmount(userCode, employMoney, null, userCode);
+                int i = customerInfoMapper.addAmount(userCode, employMoney, 0.00, userCode);
                 CustomerRechargeRecord record1 = new CustomerRechargeRecord();
                 record1.setCustomerCode(userCode);
                 record1.setAmount(employMoney);

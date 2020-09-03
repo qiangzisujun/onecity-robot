@@ -1509,7 +1509,7 @@ public class CustomerServiceImpl implements CustomerService {
                 int rowResult = this.customerRechargeRecordMapper.insertSelective(customerRechargeRecord);
             }
 
-            int rowCount = customerInfoMapper.addAmount(Long.valueOf(customerCode), userMoney+handselMoney,null, userId);
+            int rowCount = customerInfoMapper.addAmount(Long.valueOf(customerCode), userMoney+handselMoney,0.00, userId);
             if (rowCount > 0) {
                 CustomerRechargeRecord customerRechargeRecord = new CustomerRechargeRecord();
                 customerRechargeRecord.setCustomerCode(Long.valueOf(customerCode));
