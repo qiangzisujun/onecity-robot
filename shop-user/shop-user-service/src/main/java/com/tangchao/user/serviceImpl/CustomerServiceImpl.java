@@ -154,7 +154,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customer record = new Customer();
         record.setUserMobile(phone);
         record.setFlag(0);
-        //record.setIsRobot(0);
+        record.setIsRobot(0);
         List<Customer> userList = customerMapper.select(record);
         if (userList.isEmpty()) {//用户不存在
             throw new CustomerException(ExceptionEnum.INVALID_USER_NOT_FOND);

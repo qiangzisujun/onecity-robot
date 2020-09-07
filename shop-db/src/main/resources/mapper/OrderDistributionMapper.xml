@@ -30,7 +30,7 @@
 	</select>
 	
 	<select id="sumCommissionListByUserCode" resultType="java.util.Map">
-		select sum(a.remind_money) as totalMoney,c.employ_money as balance
+		select IF(sum(a.remind_money) is null,0,sum(a.remind_money)) as totalMoney,IF(c.employ_money is null,0,c.employ_money) as balance
 		from order_distribution a
 		left join customer b on a.beneficiary_code=b.user_code
 		left join customer_info c on c.customer_code=b.user_code
