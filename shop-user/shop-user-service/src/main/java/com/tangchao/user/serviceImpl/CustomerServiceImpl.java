@@ -1778,15 +1778,10 @@ public class CustomerServiceImpl implements CustomerService {
         //  设置中奖订单的收货地址
         winningOrder.setUserName(userAddress.getUserName());
         winningOrder.setUserMobile(userMobile);
-        String str=userAddress.getProvince()+userAddress.getCity()+userAddress.getArea();
-        if (null!=userAddress.getStreet()){
-            str+=userAddress.getStreet();
-        }
         if (null!=userAddress.getDetailed()){
-            str+=userAddress.getDetailed();
+            winningOrder.setUserAddress(userAddress.getDetailed());
         }
         winningOrder.setZipCode(userAddress.getZipCode());
-        winningOrder.setUserAddress(str);
         winningOrder.setSubmitTime(new Date());
         //  保存订单信息
         int count=this.winningOrderMapper.updateByPrimaryKey(winningOrder);
