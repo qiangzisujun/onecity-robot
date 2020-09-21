@@ -1,4 +1,4 @@
 spring:
   # 环境 dev|test|prod
   profiles:
-    active: prod
+    active: dev
