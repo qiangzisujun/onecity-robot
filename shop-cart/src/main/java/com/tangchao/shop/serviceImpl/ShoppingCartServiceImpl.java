@@ -25,6 +25,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -211,7 +212,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         List<CartVO> cartVOList = new ArrayList<>();
         for (ShoppingCart cart : carts) {
             //  获取商品信息
-            GoodsStage goodsStage = goodsStageMapper.getGoodsStageInfoById(cart.getStageId().toString());
+            Optional<GoodsStage> optional = Optional.ofNullable(goodsStageMapper.getGoodsStageInfoById(cart.getStageId().toString()));
+
+            if (!optional.isPresent()){
+                count=cartMapper.deleteByPrimaryKey(cart);
+                continue;
+            }
+
+            GoodsStage goodsStage=optional.get();
 
             //  校验库存
             if (goodsStage.getGoodsInv() <= 0){
