@@ -46,9 +46,9 @@ public class GoodsLockingTask {
 
     /**
      * 修改已超时订单的状态
-     * 每天凌晨3点执行一次
+     * 每5分钟执行一次
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(fixedDelay = 1000*60*5)
     public void cancelOrder(){
         UserConf str=this.confService.selectCmsValue(ConfigkeyConstant.MALL_ORDER_OVERTIME);
         Integer time =null;
