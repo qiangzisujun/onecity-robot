@@ -6,6 +6,7 @@ import com.tangchao.shop.dto.UserDTO;
 import com.tangchao.shop.pojo.*;
 import com.tangchao.shop.service.SendSmsMessageService;
 import com.tangchao.shop.service.ShopOrderService;
+import com.tangchao.shop.utils.FaceBookUtils;
 import com.tangchao.shop.utils.PayHelper;
 import com.tangchao.shop.vo.CustomerAddressVO;
 import com.tangchao.shop.vo.UserVO;
@@ -310,4 +311,53 @@ public class UserController {
     public ResponseEntity<Map<String,String>> customerRechargeByBillplz(@LoginUser Long userCode,@ApiParam(value = "充值金额",name = "money") @RequestParam(value = "money") Double money,HttpServletRequest request){
         return  ResponseEntity.ok(shopOrderService.payOrderByBillplz(userCode,request,money));
     }
+
+    /**
+     * 脸书登录
+     *
+     * @param code
+     *            仅能使用一次的code，用来获取access_token
+     * @throws Exception
+     */
+    @GetMapping("/facebook")
+    public String facebookLogin(String code, HttpServletRequest request,HttpServletResponse response) throws Exception {
+        String rootPath = request.getContextPath();
+        String serverName =request.getServerName();
+        if(serverName==null || serverName=="") {
+            serverName = "onecityonline";
+        }
+        Map<String, String> accessTokenInfo = FaceBookUtils.getAccessTokenInfo(code, rootPath,serverName);
+        String accessToken = accessTokenInfo.get("access_token");//取出token
+        Map<String, String> fbUserInfoMap = FaceBookUtils.userInfoApiUrl(accessToken);
+        String facebookId = null;
+        if(fbUserInfoMap !=null ) {//授权成功
+            facebookId = fbUserInfoMap.get("id");
+            //查询用户是否存在
+//            Customer customer = new Customer();
+//            Long customerId=customerTokenService.selectCustomerIdByFacebookId(fbUserInfoMap.get("id"));
+            if (true) {//用户存在
+//                customer = this.customerService.findCustomerById(customerId);// 查询会员
+//                if(customer == null) {
+//                    customer = createFaceBookCustomer(fbUserInfoMap);// 创建facebook会员
+//                    customer = (Customer) this.customerService.createCustomer(customer).getData();
+//                    this.customerTokenService.updateCustomerIdByfacebookId(customer.getId(), fbUserInfoMap.get("id"));// 更新令牌信息
+//                }
+//                customer.setLoginToken(RandomUtil.generateLongByDateTime(3));// 生成登录令牌
+//                customerLogin(request, response, customer);// 会员登录
+                return "success";
+            }else {//用户不存在   需要创建
+//                customer = createFaceBookCustomer(fbUserInfoMap);
+//                customer = (Customer) this.customerService.createCustomer(customer).getData();
+//                CustomerToken token = new CustomerToken();
+//                token.setCustomerId(customer.getId());
+//                token.setFacebookId(facebookId);
+//                this.customerTokenService.createCustomerToken(token);// 创建令牌信息
+//                customer.setLoginToken(RandomUtil.generateLongByDateTime(3));// 生成登录令牌
+//                customerLogin(request, response, customer);// 会员登录
+//                return modelAndView;
+            }
+        }
+        return "success";
+    }
+
 }
