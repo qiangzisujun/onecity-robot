@@ -1563,7 +1563,7 @@ public class ShopOrderServiceImpl implements ShopOrderService {
             throw new CustomerException(ExceptionEnum.ORDER_NOT_ERROR);
         }
 
-        BigDecimal totalPay = new BigDecimal(String.valueOf(order.getTotalPay()));
+        BigDecimal totalPay = new BigDecimal(String.valueOf(newOrder.getTotalPay()));
         BigDecimal divide = totalPay.divide(new BigDecimal("100"));
         String contextPath = request.getServerName();
         String baseUrl = "https://" + contextPath.trim();

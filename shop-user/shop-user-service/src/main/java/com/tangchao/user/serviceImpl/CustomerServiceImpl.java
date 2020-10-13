@@ -325,15 +325,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Integer checkUserPhone(String phone) {
-
-        //手机虚拟段号
-        List<String> segmentNumber1=new ArrayList<>(Arrays.asList("167","162","165"));
-        List<String> segmentNumber2=new ArrayList<>(Arrays.asList("1703","1705","1706","1704","1707","1708","1709","1700","1701","1702"));
-
-        if (segmentNumber2.contains(phone.substring(0,4))||segmentNumber1.contains(phone.substring(0,3))){
-            throw new CustomerException(ExceptionEnum.PHONE_VIRTUAL_ACCOUNT);
-        }
-
         Customer record = new Customer();
         record.setFlag(0);
         record.setUserMobile(phone);
@@ -2060,8 +2051,7 @@ public class CustomerServiceImpl implements CustomerService {
             throw new CustomerException(ExceptionEnum.SHARE_MAKE_MONEY_ERROR);
         }
 
-        java.net.URL  url = new  java.net.URL(request.getHeader("Referer"));
-        String content="http://"+url.getHost()+"?id="+customerInfo.getInviteCode();
+        String content="https://www.onecityonline.com/?id="+customerInfo.getInviteCode();
         System.out.println(content);
         BufferedImage bufferedImage= QRCodeUtil.createImage(content, null, false);
         return WaterMarkUtil.markImageByIcon(bufferedImage,image.getConfValue(),abscissa,ordinate);
