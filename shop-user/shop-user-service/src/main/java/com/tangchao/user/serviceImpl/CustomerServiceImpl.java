@@ -218,7 +218,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         //从redis取出验证码
-        String cacheCode = redisTemplate.opsForValue().get(KEY_PREFIX + user.getPhone());
+        String cacheCode = redisTemplate.opsForValue().get(KEY_PREFIX + "6"+user.getPhone());
         //校验验证码
         if (!StringUtils.equals(user.getCode(), cacheCode)) {
             throw new CustomerException(ExceptionEnum.INVALID_VERIFY_CODE);
