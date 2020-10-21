@@ -216,9 +216,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (user.getPassword().length() > 16 || user.getPassword().length() < 6) {
             throw new CustomerException(ExceptionEnum.INVALID__PASSWORD_LENGTH);
         }
-
+        String mobile = "6"+user.getPhone();
         //从redis取出验证码
-        String cacheCode = redisTemplate.opsForValue().get(KEY_PREFIX + "6"+user.getPhone());
+        String cacheCode = redisTemplate.opsForValue().get(KEY_PREFIX + mobile);
         //校验验证码
         if (!StringUtils.equals(user.getCode(), cacheCode)) {
             throw new CustomerException(ExceptionEnum.INVALID_VERIFY_CODE);
@@ -235,7 +235,7 @@ public class CustomerServiceImpl implements CustomerService {
         //写入数据库
         String ip = IPAddressUtil.getClientIpAddress(request);
         Customer customer = new Customer();
-        String mobile = user.getPhone();
+
         customer.setLoginPwd(user.getPassword()); // 登陆密码
         customer.setUserName(new StringBuilder(mobile).replace(3, 7, "****").toString()); // 设置会员名（手机号，用户可修改）
         customer.setUserMobile(mobile); // 设置会员手机

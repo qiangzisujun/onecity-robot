@@ -116,7 +116,7 @@
                 and stage_index=#{stageIndex}
             </if>
         </where>
-        order by id desc limit 1
+        order by a.id desc limit 1
     </select>
 
     <select id="selectMaxIndexByGoodsId" resultType="java.lang.Integer">
