@@ -193,7 +193,7 @@ public class OpenWinningTask {
     }
 
 
-    @Scheduled(fixedDelay = 1000)
+    //@Scheduled(fixedDelay = 1000)
     public void openWinning() throws Exception {
 
         // 修复库存
