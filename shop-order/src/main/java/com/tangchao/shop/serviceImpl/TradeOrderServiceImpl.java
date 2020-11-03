@@ -715,7 +715,7 @@ public class TradeOrderServiceImpl implements TradeOrderService {
                 continue;
 
             // 获取期次商品信息
-            GoodsStage goodsStage = stageMap.get(orderGoods.getStageId());
+            GoodsStage goodsStage =goodsStageMapper.selectByPrimaryKey(orderGoods.getStageId());
 
             // 判断是否已开奖
             if (null != goodsStage.getIsAward() && goodsStage.getIsAward().equals(1)) {
@@ -732,7 +732,6 @@ public class TradeOrderServiceImpl implements TradeOrderService {
                 // 模拟库存不足
                 throw new Exception("商品" + goodsStage.getGoodsName() + "库存不足");
             }
-
             // 扣减库存
             goodsStage.setGoodsInv(stock);
             // 当前购买数
@@ -782,6 +781,7 @@ public class TradeOrderServiceImpl implements TradeOrderService {
                 cart.setGoodsNo(goodsStage.getGoodsNo());
                 cartList.add(cart);
             }
+
         }
 
         if (IsRobot.equals(0)){
@@ -1023,7 +1023,9 @@ public class TradeOrderServiceImpl implements TradeOrderService {
         return stage;
     }
 
-    private int createLotteryByOrderGoods(OrderGoodsDTO orderGoods) {
+    @Transactional(rollbackFor = Exception.class)
+    public int createLotteryByOrderGoods(OrderGoodsDTO orderGoods) {
+        System.out.println("开始生成幸运号"+orderGoods.getPayNum());
         Lottery lottery = new Lottery();
         lottery.setOrderGoodsId(orderGoods.getId());        //  订单商品Id
         lottery.setGoodsNo(orderGoods.getGoodsNo());        //  商品唯一编码
@@ -1068,6 +1070,7 @@ public class TradeOrderServiceImpl implements TradeOrderService {
             String lotteryCode = StringUtil.createLuckyNumber(luckyNumberList);
             sb.append(lotteryCode).append(",");
         }
+        System.out.println("幸运号生成数量"+orderGoods.getPayNum()+"==="+sb.length());
         lottery.setLotteryCode(sb.toString());
         //  保存
         this.lotteryMapper.insertSelective(lottery);

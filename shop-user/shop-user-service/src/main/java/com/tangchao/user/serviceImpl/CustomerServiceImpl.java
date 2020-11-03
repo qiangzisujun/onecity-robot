@@ -1387,7 +1387,9 @@ public class CustomerServiceImpl implements CustomerService {
                         throw new CustomerException(ExceptionEnum.OPERATING_FAIL);
                     }
                 }
-                this.threeLevelDistribution(userMoney+handselMoney, customer.getInviteId(),customer.getUserCode());
+                String str="后台充值分销";
+
+                this.threeLevelDistribution(userMoney+handselMoney, customer.getInviteId(),customer.getUserCode(),str);
             }else if (type==2){//扣减
                 logger.info("进入扣减:登录账号Id"+userId+"登录ip"+IPAddressUtil.getClientIpAddress(request)+"充值手机号:"+mobile+"充值金额:userMoney","充值积分:"+type);
                 int count=this.customerMinus(customer.getUserCode(),userMoney,userScore,userId,2,null);
@@ -1964,7 +1966,7 @@ public class CustomerServiceImpl implements CustomerService {
         CustomerInfo proxyCustomerInfo =new CustomerInfo();
         proxyCustomerInfo.setCustomerCode(userId);
         proxyCustomerInfo=customerInfoMapper.selectOne(proxyCustomerInfo);
-        if (proxyCustomerInfo.getUserMoney()<=price){
+        if (proxyCustomerInfo.getUserMoney()<price){
             throw new CustomerException(ExceptionEnum.USER_BALANCE_INSUFFICIENT);
         }
         proxyCustomerInfo.setUserMoney(price);
@@ -1972,6 +1974,10 @@ public class CustomerServiceImpl implements CustomerService {
         if (count!=1){
             throw new CustomerException(ExceptionEnum.RECHARGE_SAVE_ERROR);
         }
+
+        String str="代理充值分销";
+
+        this.threeLevelDistribution(price, customer.getInviteId(),customer.getUserCode(),str);
     }
 
     @Override
@@ -2666,10 +2672,10 @@ public class CustomerServiceImpl implements CustomerService {
      * 三级分销
      * @param inviteId
      */
-    private void threeLevelDistribution(Double actualPay, String inviteId,Long userCode){
+    private void threeLevelDistribution(Double actualPay, String inviteId,Long userCode,String markDesc){
 
         OrderDistribution distribution = new OrderDistribution();
-        distribution.setOrderNo("后台充值分销");            //  订单编号
+        distribution.setOrderNo(markDesc);            //  订单编号
         distribution.setOrderTotal(actualPay); //  订单总额（扣除最小支付金额）
         distribution.setRemindLayer(1);                         //  提点层级
         distribution.setPurchaserCode(userCode); //  订单消费者编号

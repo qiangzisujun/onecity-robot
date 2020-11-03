@@ -240,7 +240,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public synchronized Double commitOrder(Integer isUse,Long orderNo, Integer isAutoBuyNext, HttpServletRequest request) throws Exception {
+    public Double commitOrder(Integer isUse,Long orderNo, Integer isAutoBuyNext, HttpServletRequest request) throws Exception {
 
 
         int count = 0;

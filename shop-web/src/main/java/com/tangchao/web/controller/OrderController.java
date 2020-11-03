@@ -40,7 +40,7 @@ public class OrderController {
 
     @ApiOperation(value = "订单付款")
     @PostMapping("/payOrder")
-    public ResponseEntity<Double> payOrder(@ApiParam(value = "订单编号", name = "orderNo") Long orderNo,
+    public synchronized ResponseEntity<Double> payOrder(@ApiParam(value = "订单编号", name = "orderNo") Long orderNo,
                                            @ApiParam(value = "是否自动购买下一期{ 1：是,其他：不是 }", name = "isAutoBuyNext") Integer isAutoBuyNext,
                                            @ApiParam(value = "是否使用福分0:不使用，1使用", name = "isUse") Integer isUse, HttpServletRequest request) throws Exception {
 
